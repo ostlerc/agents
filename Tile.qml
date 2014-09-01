@@ -3,6 +3,7 @@ import QtQuick 2.0
 Rectangle {
     id: tile
     property int type: 0
+    property bool solution: false
     width: 30
     height: 30
     color: {
@@ -15,9 +16,14 @@ Rectangle {
         else //end
         return "red"
     }
-    border.color: "black"
+    border.color: {
+        if (grid.Edited || !solution) {
+            solution = false
+            return "black"
+        }
+        return "blue"
+    }
     border.width: 5
-
     MouseArea {
         id: mouseArea
         anchors.fill: parent
@@ -28,14 +34,17 @@ Rectangle {
                 if (type == 0) {
                     type = 1 //wall
                 } else {
-                    type  = 0 //start
+                    type  = 0 //open
                 }
             } else {
                 if (!grid.hasStart) {
-                    grid.hasStart = true
-                    type = 2
-                }
-                if (!grid.hasEnd) {
+                    if (type == 3) {
+                        type = 0
+                    } else {
+                        grid.hasStart = true
+                        type = 2
+                    }
+                } else if (!grid.hasEnd) {
                     grid.hasEnd = true
                     type = 3
                 }
