@@ -11,7 +11,8 @@ Rectangle {
 
     Item {
         id: m
-        anchors.fill: parent
+        width: parent.width
+        anchors { top: parent.top; bottom: toolBar.top }
 
         Flickable {
             anchors.fill: parent
@@ -20,36 +21,99 @@ Rectangle {
             flickableDirection: Flickable.HorizontalAndVerticalFlick
             Grid {
                 id: g
+                objectName: "grid"
                 anchors.centerIn: parent
 
-                columns: 10
+                columns: grid.columnCount
+                rows: grid.rowCount
                 spacing: 1
-
-                Repeater {
-                    model: 100
-                    delegate: S.Tile { type: index % 4; }
-                }
             }
         }
     }
 
     Rectangle {
         id: toolBar
-        width: parent.width; height: 30
-        color: activePalette.window
+        width: parent.width; height: runBtn.height
+        color: "white"
+        border.color: "black"
+        border.width: 1
         anchors.bottom: screen.bottom
 
         Button {
-            anchors { left: parent.left; verticalCenter: parent.verticalCenter }
-            text: "New Game"
-            onClicked: grid.clicked()
+            id: buildBtn
+            anchors { left: parent.left; verticalCenter: parent.verticalCenter; margins: 5 }
+            text: "Create Grid"
+            onClicked: grid.buildGrid()
+        }
+
+        Button {
+            id: runBtn
+            anchors { left: buildBtn.right; verticalCenter: parent.verticalCenter; margins: 5 }
+            text: "Run AStar"
+            onClicked: grid.runAStar()
         }
 
         Text {
-            objectName: "text"
-            id: score
-            anchors { right: parent.right; verticalCenter: parent.verticalCenter }
-            text: "0"
+            id: colText
+            anchors { left: runBtn.right; top: parent.top; margins: 5 }
+            text: "Columns:"
+        }
+        Text {
+            id: rowText
+            anchors { left: colRect.right; top: parent.top; margins: 5 }
+            text: "Rows:"
+        }
+
+        Rectangle {
+            id: colRect
+            border.color: "black"
+            border.width: 1
+            anchors { left: colText.right; top: parent.top; margins: 5 }
+            color: "red"
+            width: 30
+            height: c.height
+            radius: 5
+            TextInput {
+                id: r
+                objectName: "rows"
+                focus: true
+                text: "10"
+                validator: IntValidator{bottom:1; top: 20}
+                anchors { verticalCenter: parent.verticalCenter; horizontalCenter: parent.horizontalCenter }
+                onAccepted: grid.rowsClicked()
+            }
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    r.forceActiveFocus()
+                }
+            }
+        }
+
+        Rectangle {
+            id: rowRect
+            border.color: "black"
+            border.width: 1
+            anchors { left: rowText.right; top: parent.top; leftMargin: 5; topMargin: 5 }
+            color: "lightsteelblue"
+            width: 30
+            height: c.height
+            radius: 5
+            TextInput {
+                id: c
+                objectName: "cols"
+                validator: IntValidator{bottom:1; top: 20}
+                focus: true
+                text: "10"
+                anchors { verticalCenter: parent.verticalCenter; horizontalCenter: parent.horizontalCenter }
+                onAccepted: grid.colsClicked()
+            }
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    c.forceActiveFocus()
+                }
+            }
         }
     }
 }

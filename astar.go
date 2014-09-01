@@ -9,13 +9,27 @@ import (
 )
 
 type Grid struct {
-	Text qml.Object
+	Rows        qml.Object
+	Cols        qml.Object
+	Grid        qml.Object
+	ColumnCount int
+	RowCount    int
+	HasStart    bool
+	HasEnd      bool
 }
 
-func (g *Grid) Clicked() {
-	s := (g.Text.Property("text")).(string)
-	i, _ := strconv.Atoi(s)
-	g.Text.Set("text", strconv.Itoa(i+1))
+func (g *Grid) BuildGrid() {
+}
+
+func (g *Grid) RunAStar() {
+}
+
+func (g *Grid) RowsClicked() {
+	g.RowCount, _ = strconv.Atoi((g.Rows.Property("text")).(string))
+}
+
+func (g *Grid) ColsClicked() {
+	g.ColumnCount, _ = strconv.Atoi((g.Cols.Property("text")).(string))
 }
 
 func main() {
@@ -34,14 +48,16 @@ func run() error {
 		return err
 	}
 
-	grid := Grid{}
+	grid := Grid{HasStart: true, HasEnd: true, ColumnCount: 10, RowCount: 10}
 
 	context := engine.Context()
 	context.SetVar("grid", &grid)
 
 	win := component.CreateWindow(nil)
 
-	grid.Text = win.Root().ObjectByName("text")
+	grid.Rows = win.Root().ObjectByName("rows")
+	grid.Cols = win.Root().ObjectByName("cols")
+	grid.Grid = win.Root().ObjectByName("grid")
 
 	win.Show()
 	win.Wait()

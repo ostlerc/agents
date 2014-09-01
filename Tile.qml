@@ -1,11 +1,10 @@
 import QtQuick 2.0
-import QtQuick.Particles 2.0
 
 Rectangle {
     id: tile
     property int type: 0
-    width: 50
-    height: 50
+    width: 30
+    height: 30
     color: {
         if (type == 0) //open
         return "white"
@@ -23,10 +22,30 @@ Rectangle {
         id: mouseArea
         anchors.fill: parent
         onClicked: {
-            if (type == 0)
-            type = 1
-            else if (type == 1)
-            type = 0
+            var oldType = type
+
+            if (grid.hasStart && grid.hasEnd) {
+                if (type == 0) {
+                    type = 1 //wall
+                } else {
+                    type  = 0 //start
+                }
+            } else {
+                if (!grid.hasStart) {
+                    grid.hasStart = true
+                    type = 2
+                }
+                if (!grid.hasEnd) {
+                    grid.hasEnd = true
+                    type = 3
+                }
+            }
+
+            if (oldType == 2) {
+                grid.hasStart = false
+            } else if (oldType == 3) {
+                grid.hasEnd = false
+            }
         }
     }
 }
