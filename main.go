@@ -7,6 +7,8 @@ import (
 	"gopkg.in/qml.v1"
 )
 
+var grid Grid
+
 func main() {
 	if err := qml.Run(run); err != nil {
 		log.Fatalf("error: %v\n", err)
@@ -28,8 +30,6 @@ func run() error {
 		return err
 	}
 
-	grid := Grid{}
-
 	context := engine.Context()
 	context.SetVar("grid", &grid)
 
@@ -39,7 +39,7 @@ func run() error {
 	grid.Cols = win.Root().ObjectByName("cols")
 	grid.Grid = win.Root().ObjectByName("grid")
 	grid.RunBtn = win.Root().ObjectByName("runBtn")
-	grid.Tile = tileComponent
+	grid.Tile = &Tile{Object: tileComponent}
 
 	win.Show()
 	win.Wait()

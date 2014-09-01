@@ -53,8 +53,8 @@ Rectangle {
             anchors { left: buildBtn.right; verticalCenter: parent.verticalCenter; margins: 5 }
             text: "Run"
             width: 40
-            enabled: grid.start != null && grid.end != null
-            onClicked: grid.runManhattan()
+            enabled: false
+            onClicked: grid.runAStar()
         }
 
         Text {

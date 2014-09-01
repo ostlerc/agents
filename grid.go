@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 
 	"gopkg.in/qml.v1"
 )
@@ -10,14 +11,77 @@ type Grid struct {
 	Rows        qml.Object
 	Cols        qml.Object
 	Grid        qml.Object
-	Tile        qml.Object
+	Tile        *Tile
 	RunBtn      qml.Object
-	Tiles       []qml.Object
+	Tiles       []*Tile
 	Edited      bool
 	ColumnCount int
 	RowCount    int
-	Start       qml.Object
-	End         qml.Object
+	Start       *Tile
+	End         *Tile
+}
+
+type Tile struct {
+	Object qml.Object
+}
+
+func (t *Tile) index() int {
+	return t.Object.Int("index")
+}
+
+func (t *Tile) Obj() qml.Object {
+	return t.Object
+}
+
+func (t *Tile) Pos() (float64, float64) {
+	i := t.index()
+	x := float64(i % grid.ColumnCount)
+	y := float64(i / grid.ColumnCount)
+	return x, y
+}
+
+func (t *Tile) Neighbors() []Node {
+	nodes := make([]Node, 0, 4)
+	i := t.index()
+	top := i - grid.ColumnCount
+	if top >= 0 {
+		nodes = append(nodes, grid.Tiles[top])
+	}
+	mod := i % grid.ColumnCount
+	if mod != grid.ColumnCount-1 { //not end of column
+		nodes = append(nodes, grid.Tiles[i+1])
+	}
+	if mod != 0 && i > 0 { //not beginning ofcolumn
+		nodes = append(nodes, grid.Tiles[i-1])
+	}
+	bottom := i + grid.ColumnCount
+	if bottom < len(grid.Tiles) {
+		nodes = append(nodes, grid.Tiles[bottom])
+	}
+	return nodes
+}
+
+func (t *Tile) Dist(n Node) float64 {
+	if t.Object.Int("type") == 1 {
+		return 1e10
+	}
+	return t.EstimatedCost(n)
+}
+
+func (t *Tile) EstimatedCost(g Node) float64 {
+	tx, ty := t.Pos()
+	gx, gy := g.Pos()
+	return math.Abs(tx-gx) + math.Abs(ty-gy)
+}
+
+func (g *Grid) SetStart(i int) {
+	g.Start = g.Tiles[i]
+	g.RunBtn.Set("enabled", g.Start != nil && g.End != nil)
+}
+
+func (g *Grid) SetEnd(i int) {
+	g.End = g.Tiles[i]
+	g.RunBtn.Set("enabled", g.Start != nil && g.End != nil)
 }
 
 func (g *Grid) ClearStart() {
@@ -30,9 +94,9 @@ func (g *Grid) ClearEnd() {
 	g.RunBtn.Set("enabled", false)
 }
 
-func (g *Grid) createTile() qml.Object {
-	tile := g.Tile.Create(nil)
-	tile.Set("parent", g.Grid)
+func (g *Grid) createTile() *Tile {
+	tile := &Tile{Object: g.Tile.Object.Create(nil)}
+	tile.Object.Set("parent", g.Grid)
 	return tile
 }
 
@@ -44,60 +108,53 @@ func (g *Grid) BuildGrid() {
 	g.Edited = true
 	for _, b := range g.Tiles {
 		if b != nil {
-			b.Destroy()
+			b.Object.Destroy()
 		}
 	}
 	g.Start = nil
 	g.End = nil
-	g.RowCount = int(g.Rows.Property("value").(float64))
-	g.ColumnCount = int(g.Cols.Property("value").(float64))
+	g.RowCount = g.Rows.Int("value")
+	g.ColumnCount = g.Cols.Int("value")
 	g.Grid.Set("columns", g.ColumnCount)
 	g.RunBtn.Set("enabled", false)
 
 	fmt.Println("Building a", g.RowCount, g.ColumnCount, "grid")
 	size := g.RowCount * g.ColumnCount
-	g.Tiles = make([]qml.Object, size, size)
+	g.Tiles = make([]*Tile, size, size)
 	for n := 0; n < size; n++ {
 		g.Tiles[n] = g.createTile()
-		g.Tiles[n].Set("index", n)
+		g.Tiles[n].Object.Set("index", n)
 	}
 }
 
 func (g *Grid) RunAStar() {
-	visited := make(map[qml.Object]bool)
-	visited[g.Start] = true
-	fmt.Println(g.Start.Property("index"))
-}
-
-func (g *Grid) RunManhattan() {
-	i := g.Start.Int("index")
-	e := g.End.Int("index")
-	var sol []qml.Object
-	for i != e {
-		if i < e {
-			i++
-		} else {
-			i--
-		}
-		sol = append(sol, g.Tiles[i])
+	nodes := make([]Node, len(g.Tiles), len(g.Tiles))
+	for i, v := range g.Tiles {
+		nodes[i] = v
 	}
-
-	g.Edited = false
-	g.colorSolution(sol)
+	graph := NewAstar(nodes)
+	path, err := graph.CalculatePath(g.Start, g.End)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("finished")
+	g.colorSolution(path)
 }
 
 func (g *Grid) TileClicked() {
 	g.Edited = true
 	for _, v := range g.Tiles {
-		v.Set("solution", false)
+		v.Object.Set("solution", false)
 	}
 }
 
-func (g *Grid) colorSolution(objs []qml.Object) {
+func (g *Grid) colorSolution(objs []Node) {
 	for _, v := range objs {
-		if v.Int("type") == 1 {
+		if v.Obj().Int("type") == 1 {
 			continue
 		}
-		v.Set("solution", true)
+		x, y := v.Pos()
+		fmt.Println("coloring", x, y)
+		v.Obj().Set("solution", true)
 	}
 }

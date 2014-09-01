@@ -43,11 +43,11 @@ Rectangle {
                     if (type == 3) {
                         type = 0
                     } else {
-                        grid.start = tile
+                        grid.setStart(index)
                         type = 2
                     }
                 } else if (grid.end == null) {
-                    grid.end = tile
+                    grid.setEnd(index)
                     type = 3
                 }
             }
