@@ -40,6 +40,7 @@ Rectangle {
 
         Button {
             id: buildBtn
+            objectName: "newBtn"
             anchors { left: parent.left; verticalCenter: parent.verticalCenter; margins: 5 }
             text: "New"
             width: 40
@@ -52,8 +53,8 @@ Rectangle {
             anchors { left: buildBtn.right; verticalCenter: parent.verticalCenter; margins: 5 }
             text: "Run"
             width: 40
-            enabled: grid.hasStart && grid.hasEnd
-            onClicked: grid.runAStar()
+            enabled: grid.start != null && grid.end != null
+            onClicked: grid.runManhattan()
         }
 
         Text {

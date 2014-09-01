@@ -3,6 +3,7 @@ import QtQuick 2.0
 Rectangle {
     id: tile
     property int type: 0
+    property int index: 0
     property bool solution: false
     width: 30
     height: 30
@@ -29,31 +30,32 @@ Rectangle {
         anchors.fill: parent
         onClicked: {
             var oldType = type
+            grid.tileClicked()
 
-            if (grid.hasStart && grid.hasEnd) {
+            if (grid.start != null && grid.end != null) {
                 if (type == 0) {
                     type = 1 //wall
                 } else {
                     type  = 0 //open
                 }
             } else {
-                if (!grid.hasStart) {
+                if (grid.start == null) {
                     if (type == 3) {
                         type = 0
                     } else {
-                        grid.hasStart = true
+                        grid.start = tile
                         type = 2
                     }
-                } else if (!grid.hasEnd) {
-                    grid.hasEnd = true
+                } else if (grid.end == null) {
+                    grid.end = tile
                     type = 3
                 }
             }
 
             if (oldType == 2) {
-                grid.hasStart = false
+                grid.clearStart()
             } else if (oldType == 3) {
-                grid.hasEnd = false
+                grid.clearEnd()
             }
         }
     }
