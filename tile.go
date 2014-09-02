@@ -51,11 +51,11 @@ func (t *Tile) Neighbors() []Node {
 }
 
 func (t *Tile) Dist(n Node) float64 {
-	return t.EstimatedCost(n)
+	return 1
 }
 
 func (t *Tile) EstimatedCost(g Node) float64 {
 	tx, ty := t.Pos()
-	gx, gy := g.Pos()
+	gx, gy := g.(*Tile).Pos()
 	return math.Abs(tx-gx) + math.Abs(ty-gy)
 }

@@ -10,7 +10,6 @@ type Node interface {
 	Neighbors() []Node
 	Dist(neighbor Node) float64
 	EstimatedCost(goal Node) float64
-	Pos() (x, y float64)
 }
 
 type astar struct {
@@ -30,7 +29,7 @@ func (a *astar) CalculatePath(start, goal Node) ([]Node, error) {
 
 	for len(openset) > 0 {
 		current := lowest(f_score)
-		if current.Dist(goal) == 0 {
+		if current == goal {
 			return reconstructPath(came_from, goal), nil
 		}
 		delete(f_score, current)
