@@ -30,7 +30,7 @@ Rectangle {
         anchors.fill: parent
         onClicked: {
             var oldType = type
-            grid.tileClicked()
+            grid.clearGrid()
 
             if (grid.start != null && grid.end != null) {
                 if (type == 0) {

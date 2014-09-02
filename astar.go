@@ -1,10 +1,6 @@
 package main
 
-import (
-	"fmt"
-
-	"gopkg.in/qml.v1"
-)
+import "fmt"
 
 type Graph interface {
 	CalculatePath(start, end Node) ([]Node, error)
@@ -15,7 +11,6 @@ type Node interface {
 	Dist(neighbor Node) float64
 	EstimatedCost(goal Node) float64
 	Pos() (x, y float64)
-	Obj() qml.Object
 }
 
 type astar struct {
@@ -38,10 +33,6 @@ func (a *astar) CalculatePath(start, goal Node) ([]Node, error) {
 		if current.Dist(goal) == 0 {
 			return reconstructPath(came_from, goal), nil
 		}
-
-		x, y := current.Pos()
-		fmt.Println("current", x, y)
-
 		delete(f_score, current)
 		delete(openset, current)
 		closedset[current] = true
@@ -64,7 +55,7 @@ func (a *astar) CalculatePath(start, goal Node) ([]Node, error) {
 
 	}
 	fmt.Println("Failed")
-	return []Node{start, goal}, nil
+	return []Node{}, nil
 }
 
 func reconstructPath(came_from map[Node]Node, goal Node) []Node {
@@ -74,8 +65,6 @@ func reconstructPath(came_from map[Node]Node, goal Node) []Node {
 	for {
 		v, ok := came_from[at]
 		if !ok {
-			x, y := at.Pos()
-			fmt.Println("Not okay at", x, y)
 			break
 		}
 		res = append(res, v)

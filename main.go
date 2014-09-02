@@ -40,6 +40,7 @@ func run() error {
 	grid.Grid = win.Root().ObjectByName("grid")
 	grid.RunBtn = win.Root().ObjectByName("runBtn")
 	grid.Tile = &Tile{Object: tileComponent}
+	grid.BuildGrid()
 
 	win.Show()
 	win.Wait()

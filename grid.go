@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"math"
+	"time"
 
 	"gopkg.in/qml.v1"
 )
@@ -29,10 +30,6 @@ func (t *Tile) index() int {
 	return t.Object.Int("index")
 }
 
-func (t *Tile) Obj() qml.Object {
-	return t.Object
-}
-
 func (t *Tile) Pos() (float64, float64) {
 	i := t.index()
 	x := float64(i % grid.ColumnCount)
@@ -45,26 +42,31 @@ func (t *Tile) Neighbors() []Node {
 	i := t.index()
 	top := i - grid.ColumnCount
 	if top >= 0 {
-		nodes = append(nodes, grid.Tiles[top])
+		if grid.Tiles[top].Object.Int("type") != 1 {
+			nodes = append(nodes, grid.Tiles[top])
+		}
 	}
 	mod := i % grid.ColumnCount
 	if mod != grid.ColumnCount-1 { //not end of column
-		nodes = append(nodes, grid.Tiles[i+1])
+		if grid.Tiles[i+1].Object.Int("type") != 1 {
+			nodes = append(nodes, grid.Tiles[i+1])
+		}
 	}
 	if mod != 0 && i > 0 { //not beginning ofcolumn
-		nodes = append(nodes, grid.Tiles[i-1])
+		if grid.Tiles[i-1].Object.Int("type") != 1 {
+			nodes = append(nodes, grid.Tiles[i-1])
+		}
 	}
 	bottom := i + grid.ColumnCount
 	if bottom < len(grid.Tiles) {
-		nodes = append(nodes, grid.Tiles[bottom])
+		if grid.Tiles[bottom].Object.Int("type") != 1 {
+			nodes = append(nodes, grid.Tiles[bottom])
+		}
 	}
 	return nodes
 }
 
 func (t *Tile) Dist(n Node) float64 {
-	if t.Object.Int("type") == 1 {
-		return 1e10
-	}
 	return t.EstimatedCost(n)
 }
 
@@ -128,20 +130,24 @@ func (g *Grid) BuildGrid() {
 }
 
 func (g *Grid) RunAStar() {
+	g.ClearGrid()
 	nodes := make([]Node, len(g.Tiles), len(g.Tiles))
 	for i, v := range g.Tiles {
 		nodes[i] = v
 	}
 	graph := NewAstar(nodes)
+	start := time.Now()
 	path, err := graph.CalculatePath(g.Start, g.End)
 	if err != nil {
 		panic(err)
 	}
+	elapsed := time.Since(start)
+	fmt.Println("Took", elapsed.Nanoseconds()/1000, "microseconds")
 	fmt.Println("finished")
 	g.colorSolution(path)
 }
 
-func (g *Grid) TileClicked() {
+func (g *Grid) ClearGrid() {
 	g.Edited = true
 	for _, v := range g.Tiles {
 		v.Object.Set("solution", false)
@@ -150,11 +156,6 @@ func (g *Grid) TileClicked() {
 
 func (g *Grid) colorSolution(objs []Node) {
 	for _, v := range objs {
-		if v.Obj().Int("type") == 1 {
-			continue
-		}
-		x, y := v.Pos()
-		fmt.Println("coloring", x, y)
-		v.Obj().Set("solution", true)
+		v.(*Tile).Object.Set("solution", true)
 	}
 }
