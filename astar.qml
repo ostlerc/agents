@@ -9,30 +9,35 @@ Rectangle {
 
     SystemPalette { id: activePalette }
 
-    Text {
-        id: statusText
-        objectName: "statusText"
-        text: "Click the grid cells to make a start, end, and walls."
-        anchors { top: parent.top; margins: 5; horizontalCenter: parent.horizontalCenter }
+    Flickable {
+        anchors { top: statusRect.bottom; bottom: toolBar.top; margins: 5 }
+        height: 200
+        width: parent.width
+        contentWidth: g.width
+        contentHeight: g.height
+        flickableDirection: Flickable.HorizontalAndVerticalFlick
+        Grid {
+            id: g
+            objectName: "grid"
+            anchors.centerIn: parent
+
+            spacing: 1
+        }
     }
 
-    Item {
-        id: m
+    Rectangle {
+        id: statusRect
         width: parent.width
-        anchors { top: statusText.bottom; bottom: toolBar.top }
-
-        Flickable {
-            anchors.fill: parent
-            contentWidth: g.width
-            contentHeight: g.height
-            flickableDirection: Flickable.HorizontalAndVerticalFlick
-            Grid {
-                id: g
-                objectName: "grid"
-                anchors.centerIn: parent
-
-                spacing: 1
-            }
+        anchors.top: parent.top
+        anchors.left: parent.left
+        height: statusText.height + 10
+        border.color: "black"
+        border.width: 1
+        Text {
+            id: statusText
+            objectName: "statusText"
+            text: "Click the grid cells to make a start, end, and walls."
+            anchors { verticalCenter: parent.verticalCenter; margins: 5; horizontalCenter: parent.horizontalCenter }
         }
     }
 

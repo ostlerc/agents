@@ -121,6 +121,7 @@ func (g *Grid) BuildGrid() {
 	g.ColCount = g.Cols.Int("value")
 	g.Grid.Set("columns", g.ColCount)
 	g.RunBtn.Set("enabled", false)
+	g.StatusText.Set("text", "Click the grid cells to make a start, end, and walls.")
 
 	fmt.Println("Building a", g.RowCount, g.ColCount, "grid")
 	size := g.RowCount * g.ColCount
