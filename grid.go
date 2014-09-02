@@ -49,10 +49,6 @@ func (g *Grid) createTile() *Tile {
 	return tile
 }
 
-func (g *Grid) index(col, row int) int {
-	return col + (row * g.ColCount)
-}
-
 func (g *Grid) BuildGrid() {
 	g.Edited = true
 	for _, b := range g.Tiles {
