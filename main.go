@@ -39,7 +39,8 @@ func run() error {
 	grid.Cols = win.Root().ObjectByName("cols")
 	grid.Grid = win.Root().ObjectByName("grid")
 	grid.RunBtn = win.Root().ObjectByName("runBtn")
-	grid.Tile = &Tile{Object: tileComponent}
+	grid.StatusText = win.Root().ObjectByName("statusText")
+	grid.TileComp = &Tile{Object: tileComponent}
 	grid.BuildGrid()
 
 	win.Show()

@@ -3,23 +3,25 @@ package main
 import (
 	"fmt"
 	"math"
+	"strconv"
 	"time"
 
 	"gopkg.in/qml.v1"
 )
 
 type Grid struct {
-	Rows        qml.Object
-	Cols        qml.Object
-	Grid        qml.Object
-	Tile        *Tile
-	RunBtn      qml.Object
-	Tiles       []*Tile
-	Edited      bool
-	ColumnCount int
-	RowCount    int
-	Start       *Tile
-	End         *Tile
+	Rows       qml.Object
+	Cols       qml.Object
+	Grid       qml.Object
+	TileComp   *Tile
+	RunBtn     qml.Object
+	Tiles      []*Tile
+	Edited     bool
+	ColCount   int
+	RowCount   int
+	Start      *Tile
+	End        *Tile
+	StatusText qml.Object
 }
 
 type Tile struct {
@@ -32,22 +34,22 @@ func (t *Tile) index() int {
 
 func (t *Tile) Pos() (float64, float64) {
 	i := t.index()
-	x := float64(i % grid.ColumnCount)
-	y := float64(i / grid.ColumnCount)
+	x := float64(i % grid.ColCount)
+	y := float64(i / grid.ColCount)
 	return x, y
 }
 
 func (t *Tile) Neighbors() []Node {
 	nodes := make([]Node, 0, 4)
 	i := t.index()
-	top := i - grid.ColumnCount
+	top := i - grid.ColCount
 	if top >= 0 {
 		if grid.Tiles[top].Object.Int("type") != 1 {
 			nodes = append(nodes, grid.Tiles[top])
 		}
 	}
-	mod := i % grid.ColumnCount
-	if mod != grid.ColumnCount-1 { //not end of column
+	mod := i % grid.ColCount
+	if mod != grid.ColCount-1 { //not end of column
 		if grid.Tiles[i+1].Object.Int("type") != 1 {
 			nodes = append(nodes, grid.Tiles[i+1])
 		}
@@ -57,7 +59,7 @@ func (t *Tile) Neighbors() []Node {
 			nodes = append(nodes, grid.Tiles[i-1])
 		}
 	}
-	bottom := i + grid.ColumnCount
+	bottom := i + grid.ColCount
 	if bottom < len(grid.Tiles) {
 		if grid.Tiles[bottom].Object.Int("type") != 1 {
 			nodes = append(nodes, grid.Tiles[bottom])
@@ -97,13 +99,13 @@ func (g *Grid) ClearEnd() {
 }
 
 func (g *Grid) createTile() *Tile {
-	tile := &Tile{Object: g.Tile.Object.Create(nil)}
+	tile := &Tile{Object: g.TileComp.Object.Create(nil)}
 	tile.Object.Set("parent", g.Grid)
 	return tile
 }
 
 func (g *Grid) index(col, row int) int {
-	return col + (row * g.ColumnCount)
+	return col + (row * g.ColCount)
 }
 
 func (g *Grid) BuildGrid() {
@@ -116,12 +118,12 @@ func (g *Grid) BuildGrid() {
 	g.Start = nil
 	g.End = nil
 	g.RowCount = g.Rows.Int("value")
-	g.ColumnCount = g.Cols.Int("value")
-	g.Grid.Set("columns", g.ColumnCount)
+	g.ColCount = g.Cols.Int("value")
+	g.Grid.Set("columns", g.ColCount)
 	g.RunBtn.Set("enabled", false)
 
-	fmt.Println("Building a", g.RowCount, g.ColumnCount, "grid")
-	size := g.RowCount * g.ColumnCount
+	fmt.Println("Building a", g.RowCount, g.ColCount, "grid")
+	size := g.RowCount * g.ColCount
 	g.Tiles = make([]*Tile, size, size)
 	for n := 0; n < size; n++ {
 		g.Tiles[n] = g.createTile()
@@ -142,8 +144,12 @@ func (g *Grid) RunAStar() {
 		panic(err)
 	}
 	elapsed := time.Since(start)
-	fmt.Println("Took", elapsed.Nanoseconds()/1000, "microseconds")
-	fmt.Println("finished")
+	timeStr := "Took " + strconv.Itoa(int(elapsed.Nanoseconds()/1000)) + " microseconds"
+	if len(path) == 0 {
+		g.StatusText.Set("text", "No valid path. "+timeStr)
+	} else {
+		g.StatusText.Set("text", timeStr)
+	}
 	g.colorSolution(path)
 }
 

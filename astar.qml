@@ -5,14 +5,21 @@ import "../astar" as S
 Rectangle {
     id: screen
     width: 400
-    height: 300
+    height: 400
 
     SystemPalette { id: activePalette }
+
+    Text {
+        id: statusText
+        objectName: "statusText"
+        text: "Click the grid cells to make a start, end, and walls."
+        anchors { top: parent.top; margins: 5; horizontalCenter: parent.horizontalCenter }
+    }
 
     Item {
         id: m
         width: parent.width
-        anchors { top: parent.top; bottom: toolBar.top }
+        anchors { top: statusText.bottom; bottom: toolBar.top }
 
         Flickable {
             anchors.fill: parent
@@ -32,7 +39,7 @@ Rectangle {
     Rectangle {
         id: toolBar
         width: parent.width
-        height: 35
+        height: buildBtn.height + 10
         color: "white"
         border.color: "black"
         border.width: 1
@@ -58,19 +65,19 @@ Rectangle {
         }
 
         Text {
-            id: colText
+            id: rowText
             anchors { left: runBtn.right; verticalCenter: parent.verticalCenter; margins: 5 }
-            text: "Columns:"
+            text: "Rows:"
         }
         Text {
-            id: rowText
-            anchors { left: colRect.right; verticalCenter: parent.verticalCenter; margins: 5 }
-            text: "Rows:"
+            id: colText
+            anchors { left: rowRect.right; verticalCenter: parent.verticalCenter; margins: 5 }
+            text: "Columns:"
         }
 
         SpinBox {
             id: colRect
-            objectName: "rows"
+            objectName: "cols"
             width: 45
             anchors { left: colText.right; verticalCenter: parent.verticalCenter; margins: 5 }
             maximumValue: 20
@@ -80,7 +87,7 @@ Rectangle {
 
         SpinBox {
             id: rowRect
-            objectName: "cols"
+            objectName: "rows"
             width: 45
             anchors { left: rowText.right; verticalCenter: parent.verticalCenter; margins: 5 }
             maximumValue: 20
