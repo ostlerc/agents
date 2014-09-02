@@ -1,7 +1,5 @@
 package main
 
-import "fmt"
-
 type Graph interface {
 	CalculatePath(start, end Node) ([]Node, error)
 }
@@ -53,7 +51,6 @@ func (a *astar) CalculatePath(start, goal Node) ([]Node, error) {
 		}
 
 	}
-	fmt.Println("Failed")
 	return []Node{}, nil
 }
 
