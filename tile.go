@@ -10,12 +10,8 @@ type Tile struct {
 	Object qml.Object
 }
 
-func (t *Tile) index() int {
-	return t.Object.Int("index")
-}
-
 func (t *Tile) Pos() (float64, float64) {
-	i := t.index()
+	i := t.Object.Int("index")
 	x := float64(i % grid.ColCount)
 	y := float64(i / grid.ColCount)
 	return x, y
@@ -23,7 +19,7 @@ func (t *Tile) Pos() (float64, float64) {
 
 func (t *Tile) Neighbors() []Node {
 	nodes := make([]Node, 0, 4)
-	i := t.index()
+	i := t.Object.Int("index")
 	top := i - grid.ColCount
 	if top >= 0 {
 		if grid.Tiles[top].Object.Int("type") != 1 {
