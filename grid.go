@@ -86,11 +86,14 @@ func (g *Grid) RunAStar() {
 		panic(err)
 	}
 	elapsed := time.Since(start)
-	timeStr := "Took " + strconv.Itoa(int(elapsed.Nanoseconds()/1000)) + " microseconds"
+	statusStr :=
+		strconv.Itoa(int(elapsed.Nanoseconds()/1000)) + " μs - " +
+			strconv.Itoa(graph.WorkDone()) + " nodes evaluated - " +
+			strconv.Itoa(len(path)) + " path nodes"
 	if len(path) == 0 {
-		g.StatusText.Set("text", "No valid path. "+timeStr)
+		g.StatusText.Set("text", "No valid path. "+statusStr)
 	} else {
-		g.StatusText.Set("text", timeStr)
+		g.StatusText.Set("text", statusStr)
 	}
 	g.colorSolution(path)
 }

@@ -2,6 +2,7 @@ package main
 
 type Graph interface {
 	CalculatePath(start, end Node) ([]Node, error)
+	WorkDone() int
 }
 
 type Node interface {
@@ -10,11 +11,21 @@ type Node interface {
 	EstimatedCost(goal Node) float64
 }
 
+func NewAstar(nodes []Node) Graph {
+	return &astar{Nodes: nodes}
+}
+
 type astar struct {
 	Nodes []Node
+	work  int
+}
+
+func (a *astar) WorkDone() int {
+	return a.work
 }
 
 func (a *astar) CalculatePath(start, goal Node) ([]Node, error) {
+	a.work = 0
 	closedset := make(map[Node]bool)      // The set of nodes already evaluated.
 	openset := map[Node]bool{start: true} // The set of tentative nodes to be evaluated, initially containing the start node
 	came_from := make(map[Node]Node)      // The map of navigated nodes.
@@ -27,6 +38,7 @@ func (a *astar) CalculatePath(start, goal Node) ([]Node, error) {
 
 	for len(openset) > 0 {
 		current := lowest(f_score)
+		a.work++
 		if current == goal {
 			return reconstructPath(came_from, goal), nil
 		}
@@ -80,8 +92,4 @@ func lowest(nodes map[Node]float64) Node {
 		}
 	}
 	return res
-}
-
-func NewAstar(nodes []Node) Graph {
-	return &astar{Nodes: nodes}
 }
