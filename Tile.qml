@@ -5,8 +5,8 @@ Rectangle {
     property int type: 0
     property int index: 0
     property bool solution: false
-    width: 30
-    height: 30
+    width: 20
+    height: 20
     color: {
         if (type == 0) //open
         return "white"
