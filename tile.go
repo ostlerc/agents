@@ -7,8 +7,9 @@ import (
 )
 
 type Tile struct {
-	Object   qml.Object
-	diagonal bool
+	Object     qml.Object
+	diagonal   bool
+	dneighbors map[Node]float64
 }
 
 func (t *Tile) Pos() (float64, float64) {
@@ -19,12 +20,15 @@ func (t *Tile) Pos() (float64, float64) {
 }
 
 func (t *Tile) Neighbors() []Node {
-	nodes := make([]Node, 0, 8)
+	neighbors := make([]Node, 0, 8)
+	t.dneighbors = make(map[Node]float64)
+	cost := 1.0
 	i := t.Object.Int("index")
 
 	add := func(i int) {
 		if grid.Tiles[i].Object.Int("type") != 1 {
-			nodes = append(nodes, grid.Tiles[i])
+			neighbors = append(neighbors, grid.Tiles[i])
+			t.dneighbors[grid.Tiles[i]] = cost
 		}
 	}
 
@@ -44,6 +48,8 @@ func (t *Tile) Neighbors() []Node {
 		add(bottom)
 	}
 	if t.diagonal {
+		//playing with diagonal cost.
+		//cost = math.sqrt(2)
 		if top >= 0 { //Top
 			if mod != grid.ColCount-1 { //right
 				add(i + 1 - grid.ColCount)
@@ -61,11 +67,14 @@ func (t *Tile) Neighbors() []Node {
 			}
 		}
 	}
-	return nodes
+	return neighbors
 }
 
 func (t *Tile) Dist(n Node) float64 {
-	return 1
+	if v, ok := t.dneighbors[n]; ok {
+		return v
+	}
+	panic("Incorrect non neighbor node")
 }
 
 func (t *Tile) EstimatedCost(g Node) float64 {
