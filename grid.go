@@ -44,7 +44,10 @@ func (g *Grid) ClearEnd() {
 }
 
 func (g *Grid) createTile() *Tile {
-	tile := &Tile{Object: g.TileComp.Object.Create(nil)}
+	tile := &Tile{
+		Object:   g.TileComp.Object.Create(nil),
+		diagonal: true,
+	}
 	tile.Object.Set("parent", g.Grid)
 	return tile
 }
