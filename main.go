@@ -20,7 +20,7 @@ func main() {
 func run() error {
 	engine := qml.NewEngine()
 
-	component, err := engine.LoadFile("astar.qml")
+	component, err := engine.LoadFile("agents.qml")
 	if err != nil {
 		return err
 	}
