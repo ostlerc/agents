@@ -12,6 +12,13 @@ type Tile struct {
 	neighbors map[Node]float64
 }
 
+type JSONTile struct {
+	Type  int `json:"type"`
+	Count int `json:"count"`
+	Life  int `json:"life"`
+	Index int `json:"index"`
+}
+
 //TODO: maybe remove this
 func (t *Tile) Pos() (float64, float64) {
 	i := t.Object.Int("index")
@@ -28,8 +35,8 @@ func (t *Tile) Neighbors() []Node {
 
 	add := func(i int) {
 		if grid.Tiles[i].Object.Int("type") != 1 {
-			neighbors = append(neighbors, grid.Tiles[i])
-			t.neighbors[grid.Tiles[i]] = cost
+			neighbors = append(neighbors, &grid.Tiles[i])
+			t.neighbors[&grid.Tiles[i]] = cost
 		}
 	}
 

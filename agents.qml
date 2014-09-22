@@ -1,6 +1,7 @@
-import QtQuick 2.0
+import QtQuick 2.2
 import QtQuick.Controls 1.0
 import QtQuick.Layouts 1.1
+import QtQuick.Dialogs 1.0
 
 ApplicationWindow {
     width: 800
@@ -98,25 +99,54 @@ ApplicationWindow {
                 Rectangle {
                     id: toolBar
                     Layout.fillWidth: true
-                    anchors.margins: 5
-                    Layout.preferredHeight: buildBtn.height + 10
+                    Layout.preferredHeight: newBtn.height + 10
                     color: "white"
 
                     RowLayout {
+                        id: bottomLayout
                         anchors.fill: parent
 
                         Button {
-                            id: buildBtn
-                            objectName: "newBtn"
+                            id: newBtn
                             text: "New"
                             onClicked: grid.buildGrid()
                         }
 
                         Button {
-                            id: runBtn
+                            text: "Save"
+                            onClicked: {
+                                fileDialog.type = 0 //save
+                                fileDialog.open()
+                            }
+                        }
+
+                        FileDialog {
+                            id: fileDialog
+                            property int type: 0
+                            objectName: "fileDialog"
+                            title: "Choose a filename"
+                            onAccepted: {
+                                console.log("You chose: " + fileDialog.fileUrls)
+                                if(!type) {
+                                    grid.saveGrid(fileDialog.fileUrls.toString())
+                                } else {
+                                    grid.loadGrid(fileDialog.fileUrls.toString())
+                                }
+                            }
+                        }
+
+                        Button {
+                            text: "Load"
+                            onClicked: {
+                                fileDialog.type = 1 //load
+                                fileDialog.open()
+                            }
+                        }
+
+                        Button {
                             objectName: "runBtn"
                             text: "Run"
-                            enabled: false
+                            visible: false
                             //onClicked: grid.runAStar()
                         }
 

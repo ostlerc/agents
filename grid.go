@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 
 	"gopkg.in/qml.v1"
 )
@@ -21,11 +23,17 @@ type Grid struct {
 	Nest     *Tile
 	Selected *Tile
 
-	Tiles []*Tile
+	Tiles []Tile
 
 	Edited   bool
 	ColCount int
 	RowCount int
+}
+
+type JSONGrid struct {
+	Rows  int        `json:"rows"`
+	Cols  int        `json:"cols"`
+	Tiles []JSONTile `json:"tiles"`
 }
 
 func (g *Grid) SetCount(i int) {
@@ -55,13 +63,13 @@ func (g *Grid) FoodLife() int {
 }
 
 func (g *Grid) SetNest(i int) {
-	g.Nest = g.Tiles[i]
-	g.RunBtn.Set("enabled", g.Nest != nil)
+	g.Nest = &g.Tiles[i]
+	g.RunBtn.Set("visible", g.Nest != nil)
 }
 
 func (g *Grid) ClearNest() {
 	g.Nest = nil
-	g.RunBtn.Set("enabled", false)
+	g.RunBtn.Set("visible", false)
 }
 
 func (g *Grid) ResetStatus() {
@@ -73,13 +81,13 @@ func (g *Grid) ResetStatus() {
 func (g *Grid) SetSelected(i int) {
 	if g.Selected != nil {
 		g.Selected.Object.Set("selected", false)
-		if g.Tiles[i] == g.Selected {
+		if &g.Tiles[i] == g.Selected {
 			g.Selected = nil
 			g.ResetStatus()
 			return
 		}
 	}
-	g.Selected = g.Tiles[i]
+	g.Selected = &g.Tiles[i]
 	g.Selected.Object.Set("selected", true)
 	g.UpdateStatus()
 }
@@ -122,8 +130,8 @@ func (g *Grid) StatusFromTile(t *Tile) string {
 	return fmt.Sprintf("%v", name)
 }
 
-func (g *Grid) createTile() *Tile {
-	tile := &Tile{
+func (g *Grid) createTile() Tile {
+	tile := Tile{
 		Object:   g.TileComp.Object.Create(nil),
 		diagonal: true,
 	}
@@ -131,25 +139,91 @@ func (g *Grid) createTile() *Tile {
 	return tile
 }
 
+func (g *Grid) SaveGrid(filename string) {
+	filename = filename[7:]
+	jg := &JSONGrid{
+		Rows: g.RowCount,
+		Cols: g.ColCount,
+	}
+	tiles := make([]JSONTile, 0, jg.Rows*jg.Cols)
+
+	for _, v := range g.Tiles {
+		ttype := v.Object.Int("type")
+		if ttype == 0 { //skip open nodes
+			continue
+		}
+		t := JSONTile{
+			Type:  ttype,
+			Count: v.Object.Int("count"),
+			Life:  v.Object.Int("life"),
+			Index: v.Object.Int("index"),
+		}
+		tiles = append(tiles, t)
+	}
+
+	jg.Tiles = tiles
+
+	dat, err := json.Marshal(jg)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(string(dat))
+	err = ioutil.WriteFile(filename, dat, 0644)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println("Successfully Saved", filename)
+}
+
+func (g *Grid) LoadGrid(filename string) {
+	filename = filename[7:]
+	dat, err := ioutil.ReadFile(filename)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	var newg JSONGrid
+	err = json.Unmarshal(dat, &newg)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	g.Rows.Set("value", newg.Rows)
+	g.Cols.Set("value", newg.Cols)
+	g.BuildGrid()
+	for _, t := range newg.Tiles {
+		g.Tiles[t.Index].Object.Set("type", t.Type)
+		g.Tiles[t.Index].Object.Set("life", t.Life)
+		g.Tiles[t.Index].Object.Set("count", t.Count)
+
+		switch t.Type {
+		case 2: //next
+			g.Nest = &g.Tiles[t.Index]
+		}
+	}
+	fmt.Println("Successfully Loaded", filename)
+}
+
 func (g *Grid) BuildGrid() {
 	g.Edited = true
 	for _, b := range g.Tiles {
-		if b != nil {
-			b.Object.Destroy()
-		}
+		b.Object.Set("visible", false)
+		b.Object.Destroy()
 	}
 	g.Nest = nil
 	g.RowCount = g.Rows.Int("value")
 	g.ColCount = g.Cols.Int("value")
 	g.Grid.Set("columns", g.ColCount)
-	g.RunBtn.Set("enabled", false)
+	g.RunBtn.Set("visible", false)
 	g.ResetStatus()
 	g.Nest = nil
 	g.Selected = nil
 
 	fmt.Println("Building a", g.RowCount, g.ColCount, "grid")
 	size := g.RowCount * g.ColCount
-	g.Tiles = make([]*Tile, size, size)
+	g.Tiles = make([]Tile, size, size)
 	for n := 0; n < size; n++ {
 		g.Tiles[n] = g.createTile()
 		g.Tiles[n].Object.Set("index", n)

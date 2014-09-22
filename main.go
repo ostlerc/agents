@@ -8,6 +8,7 @@ import (
 )
 
 var grid Grid
+var dialog qml.Object
 
 func main() {
 	if err := qml.Run(run); err != nil {
@@ -46,6 +47,8 @@ func run() error {
 	grid.FoodTime = win.Root().ObjectByName("defaultFoodLifetimeCombo")
 	grid.TileComp = &Tile{Object: tileComponent}
 	grid.BuildGrid()
+
+	dialog = win.Root().ObjectByName("fileDialog")
 
 	win.Show()
 	win.Wait()
