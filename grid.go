@@ -17,6 +17,7 @@ type Grid struct {
 	ColCount   int
 	RowCount   int
 	Home       *Tile
+	Selected   *Tile
 	StatusText qml.Object
 }
 
@@ -28,6 +29,28 @@ func (g *Grid) SetHome(i int) {
 func (g *Grid) ClearHome() {
 	g.Home = nil
 	g.RunBtn.Set("enabled", false)
+}
+
+func (g *Grid) SetSelected(i int) {
+	if g.Selected != nil {
+		g.Selected.Object.Set("selected", false)
+		if g.Tiles[i] == g.Selected {
+			g.Selected = nil
+			return
+		}
+	}
+	g.Selected = g.Tiles[i]
+	g.Selected.Object.Set("selected", true)
+
+	g.SetStatus(g.StatusFromTile(g.Selected))
+}
+
+func (g *Grid) SetStatus(s interface{}) {
+	g.StatusText.Set("text", s)
+}
+
+func (g *Grid) StatusFromTile(t *Tile) string {
+	return fmt.Sprintf("%v", t.Object.Int("type"))
 }
 
 func (g *Grid) createTile() *Tile {
@@ -60,10 +83,6 @@ func (g *Grid) BuildGrid() {
 		g.Tiles[n] = g.createTile()
 		g.Tiles[n].Object.Set("index", n)
 	}
-}
-
-func (g *Grid) SetStatus(s string) {
-	g.StatusText.Set("text", s)
 }
 
 func (g *Grid) ClearGrid() {

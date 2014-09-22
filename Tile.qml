@@ -4,7 +4,9 @@ Rectangle {
     id: tile
     property int type: 0
     property int index: 0
+    property int food: 0
     property bool solution: false
+    property bool selected: false
     width: 25
     height: 25
     color: {
@@ -18,28 +20,34 @@ Rectangle {
         return "green"
     }
     border.color: {
-        if (grid.Edited || !solution) {
+        if (!grid.Edited) {
             solution = false
-            return "black"
+            if(solution){
+                return "blue"
+            } else if(selected){
+                return "blue"
+            }
         }
-        return "blue"
+        return "black"
     }
     Text {
         anchors.centerIn: parent
         font.pixelSize: 10
         color: "white"
         visible: tile.type == 3
-        text: "14"
+        text: food
     }
     border.width: 5
     MouseArea {
         id: mouseArea
         anchors.fill: parent
         hoverEnabled: true
-        onEntered: {
-            grid.setStatus("hi" + type)
-        }
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
         onClicked: {
+            if (mouse.button == Qt.RightButton) {
+                grid.setSelected(index)
+                return
+            }
             var oldType = type
             if(!grid.edited) {
                 grid.clearGrid()
