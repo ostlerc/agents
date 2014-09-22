@@ -2,14 +2,9 @@ package main
 
 import "gopkg.in/qml.v1"
 
-type Node interface {
-	Neighbors() []Node
-}
-
 type Tile struct {
-	Object    qml.Object
-	diagonal  bool
-	neighbors map[Node]float64
+	Object   qml.Object
+	diagonal bool
 }
 
 type JSONTile struct {
@@ -20,23 +15,42 @@ type JSONTile struct {
 }
 
 //TODO: maybe remove this
-func (t *Tile) Pos() (float64, float64) {
+func (t *Tile) Pos() (int, int) {
 	i := t.Object.Int("index")
-	x := float64(i % grid.ColCount)
-	y := float64(i / grid.ColCount)
+	x := i % grid.ColCount
+	y := i / grid.ColCount
 	return x, y
 }
 
-func (t *Tile) Neighbors() []Node {
-	neighbors := make([]Node, 0, 8)
-	t.neighbors = make(map[Node]float64)
-	cost := 1.0
+func (t *Tile) Mark(int, int) {
+}
+
+func (t *Tile) Sniff() (int, int) {
+	return 0, 0
+}
+
+func (t *Tile) Snatch() Food {
+	return Food{-1}
+}
+
+func (t *Tile) Enter() {
+}
+
+func (t *Tile) Exit() {
+}
+
+func (t *Tile) Drop(Food) {
+}
+
+func (t *Tile) Neighbors() []AntNode {
+	neighbors := make([]AntNode, 0, 8)
+	//cost := 1.0
 	i := t.Object.Int("index")
 
 	add := func(i int) {
 		if grid.Tiles[i].Object.Int("type") != 1 {
 			neighbors = append(neighbors, &grid.Tiles[i])
-			t.neighbors[&grid.Tiles[i]] = cost
+			//t.neighbors[&grid.Tiles[i]] = cost
 		}
 	}
 

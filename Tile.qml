@@ -19,6 +19,8 @@ Rectangle {
         return "brown"
         else if (type == 3) // food
         return "green"
+        else if (type == 4) // ant
+        return "orange"
     }
     border.color: {
         if (!grid.Edited) {

@@ -242,7 +242,7 @@ func (g *Grid) ClearGrid() {
 	}
 }
 
-func (g *Grid) colorSolution(objs []Node) {
+func (g *Grid) colorSolution(objs []AntNode) {
 	for _, v := range objs {
 		v.(*Tile).Object.Set("solution", true)
 	}
