@@ -7,7 +7,6 @@ ApplicationWindow {
     width: 800
     height: 600
     color: "white"
-
     TabView {
         anchors.fill: parent
         Tab {
@@ -17,7 +16,6 @@ ApplicationWindow {
                 id: screen
                 anchors.fill: parent
                 spacing: 0
-
                 Rectangle {
                     id: statusRect
                     Layout.fillWidth: true
@@ -32,12 +30,10 @@ ApplicationWindow {
                             objectName: "statusText"
                             text: "Click the grid cells to make a Nest, food, and walls."
                         }
-
                         Text {
                             text: "count:"
                             visible: sb1.visible
                         }
-
                         SpinBox {
                             id: sb1
                             objectName: "countSpinner"
@@ -49,12 +45,10 @@ ApplicationWindow {
                             }
                             visible: false
                         }
-
                         Text {
                             visible: sb2.visible
                             text: "lifetime:"
                         }
-
                         SpinBox {
                             id: sb2
                             objectName: "lifeSpinner"
@@ -68,7 +62,6 @@ ApplicationWindow {
                         }
                     }
                 }
-
                 Rectangle {
                     Layout.fillHeight: true
                     Layout.fillWidth: true
@@ -82,12 +75,10 @@ ApplicationWindow {
                         Grid {
                             id: g
                             objectName: "grid"
-
                             spacing: 1
                         }
                     }
                 }
-
                 Rectangle {
                     id: botBorder
                     height: 1
@@ -95,31 +86,27 @@ ApplicationWindow {
                     Layout.fillWidth: true
                     color: "black"
                 }
-
                 Rectangle {
                     id: toolBar
                     Layout.fillWidth: true
                     Layout.preferredHeight: newBtn.height + 10
                     color: "white"
-
                     RowLayout {
                         id: bottomLayout
                         anchors.fill: parent
-
                         Button {
                             id: newBtn
                             text: "New"
                             onClicked: grid.buildGrid()
                         }
-
                         Button {
                             text: "Save"
                             onClicked: {
+                                fileDialog.close()
                                 fileDialog.type = 0 //save
                                 fileDialog.open()
                             }
                         }
-
                         FileDialog {
                             id: fileDialog
                             property int type: 0
@@ -128,33 +115,30 @@ ApplicationWindow {
                             onAccepted: {
                                 console.log("You chose: " + fileDialog.fileUrls)
                                 if(!type) {
-                                    grid.saveGrid(fileDialog.fileUrls.toString())
+                                    grid.saveGrid(fileDialog.fileUrl.toString())
                                 } else {
-                                    grid.loadGrid(fileDialog.fileUrls.toString())
+                                    grid.loadGrid(fileDialog.fileUrl.toString())
                                 }
                             }
                         }
-
                         Button {
                             text: "Load"
                             onClicked: {
+                                fileDialog.close()
                                 fileDialog.type = 1 //load
                                 fileDialog.open()
                             }
                         }
-
                         Button {
                             objectName: "runBtn"
                             text: "Run"
                             visible: false
                             //onClicked: grid.runAStar()
                         }
-
                         Text {
                             id: rowText
                             text: "Rows:"
                         }
-
                         SpinBox {
                             id: colRect
                             objectName: "cols"
@@ -162,12 +146,10 @@ ApplicationWindow {
                             minimumValue: 1
                             value: 25
                         }
-
                         Text {
                             id: colText
                             text: "Columns:"
                         }
-
                         SpinBox {
                             id: rowRect
                             objectName: "rows"
@@ -175,16 +157,13 @@ ApplicationWindow {
                             minimumValue: 1
                             value: 25
                         }
-
                         Rectangle {
                             Layout.fillWidth: true
                         }
-
                         Text {
                             id: foodcnttxt
                             text: "Food Count:"
                         }
-
                         SpinBox {
                             id: foodcntbox
                             objectName: "defaultFoodCountCombo"
@@ -192,12 +171,10 @@ ApplicationWindow {
                             minimumValue: 1
                             value: 75
                         }
-
                         Text {
                             id: foodexptxt
                             text: "Food Life:"
                         }
-
                         SpinBox {
                             id: foodexpbox
                             objectName: "defaultFoodLifetimeCombo"

@@ -13,10 +13,10 @@ type Tile struct {
 }
 
 type JSONTile struct {
-	Type  int `json:"type"`
-	Count int `json:"count"`
-	Life  int `json:"life"`
-	Index int `json:"index"`
+	Type  int `json:"type,omitempty"`
+	Count int `json:"count,omitempty"`
+	Life  int `json:"life,omitempty"`
+	Index int `json:"index,omitempty"`
 }
 
 //TODO: maybe remove this
