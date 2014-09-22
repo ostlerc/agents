@@ -3,6 +3,7 @@ agents
 This project is a qml graphical UI for showing agents in a grid
 
 By clicking on the tiles you can change their color. Each color represents a different grid element.
+Right click allows you to inspect the grid element and modify it's properties.
 
 Requirements
 ------------
@@ -16,7 +17,7 @@ Requirements
 
 * go-qml
 
-    To install go-qml visit: http://github.com/qml/go-qml
+    To install go-qml visit: http://github.com/go-qml/qml
 
 Building
 --------
