@@ -15,11 +15,12 @@ ApplicationWindow {
             ColumnLayout {
                 id: screen
                 anchors.fill: parent
+                spacing: 0
 
                 Rectangle {
                     id: statusRect
-                    height: statusRow.height + 10
                     Layout.fillWidth: true
+                    Layout.preferredHeight: statusRow.height + 10
                     border.color: "black"
                     border.width: 1
                     RowLayout {
@@ -28,11 +29,41 @@ ApplicationWindow {
                         Text {
                             id: statusText
                             objectName: "statusText"
-                            text: "Click the grid cells to make a start, end, and walls."
+                            text: "Click the grid cells to make a Nest, food, and walls."
                         }
 
                         Text {
-                            text: "text 2"
+                            text: "count:"
+                            visible: sb1.visible
+                        }
+
+                        SpinBox {
+                            id: sb1
+                            objectName: "countSpinner"
+                            maximumValue: 999
+                            minimumValue: 1
+                            value: 1
+                            onEditingFinished: {
+                                grid.setCount(value)
+                            }
+                            visible: false
+                        }
+
+                        Text {
+                            visible: sb2.visible
+                            text: "lifetime:"
+                        }
+
+                        SpinBox {
+                            id: sb2
+                            objectName: "lifeSpinner"
+                            maximumValue: 999
+                            minimumValue: 1
+                            value: 25
+                            onEditingFinished: {
+                                grid.setLife(value)
+                            }
+                            visible: false
                         }
                     }
                 }
@@ -64,94 +95,86 @@ ApplicationWindow {
                     color: "black"
                 }
 
-                RowLayout {
+                Rectangle {
                     id: toolBar
                     Layout.fillWidth: true
+                    anchors.margins: 5
                     Layout.preferredHeight: buildBtn.height + 10
+                    color: "white"
 
-                    Button {
-                        id: buildBtn
-                        objectName: "newBtn"
-                        anchors {  margins: 5 }
-                        text: "New"
-                        width: 40
-                        onClicked: grid.buildGrid()
-                    }
+                    RowLayout {
+                        anchors.fill: parent
 
-                    Button {
-                        id: runBtn
-                        objectName: "runBtn"
-                        anchors {  margins: 5 }
-                        text: "Run"
-                        width: 40
-                        enabled: false
-                        //onClicked: grid.runAStar()
-                    }
+                        Button {
+                            id: buildBtn
+                            objectName: "newBtn"
+                            text: "New"
+                            onClicked: grid.buildGrid()
+                        }
 
-                    Text {
-                        id: rowText
-                        anchors {  margins: 5 }
-                        text: "Rows:"
-                    }
+                        Button {
+                            id: runBtn
+                            objectName: "runBtn"
+                            text: "Run"
+                            enabled: false
+                            //onClicked: grid.runAStar()
+                        }
 
-                    SpinBox {
-                        id: colRect
-                        objectName: "cols"
-                        width: 45
-                        anchors {  margins: 5 }
-                        maximumValue: 50
-                        minimumValue: 1
-                        value: 25
-                    }
+                        Text {
+                            id: rowText
+                            text: "Rows:"
+                        }
 
-                    Text {
-                        id: colText
-                        anchors {  margins: 5 }
-                        text: "Columns:"
-                    }
+                        SpinBox {
+                            id: colRect
+                            objectName: "cols"
+                            maximumValue: 99
+                            minimumValue: 1
+                            value: 25
+                        }
 
-                    SpinBox {
-                        id: rowRect
-                        objectName: "rows"
-                        width: 45
-                        anchors {  margins: 5 }
-                        maximumValue: 50
-                        minimumValue: 1
-                        value: 25
-                    }
-                    
-                    Rectangle {
-                        Layout.fillWidth: true
-                    }
+                        Text {
+                            id: colText
+                            text: "Columns:"
+                        }
 
-                    Text {
-                        id: foodcnttxt
-                        anchors {  margins: 5 }
-                        text: "Food Count:"
-                    }
+                        SpinBox {
+                            id: rowRect
+                            objectName: "rows"
+                            maximumValue: 99
+                            minimumValue: 1
+                            value: 25
+                        }
 
-                    SpinBox {
-                        id: foodcntbox
-                        width: 65
-                        anchors {  margins: 5 }
-                        maximumValue: 999
-                        minimumValue: 1
-                        value: 250
-                    }
+                        Rectangle {
+                            Layout.fillWidth: true
+                        }
 
-                    Text {
-                        id: foodexptxt
-                        anchors {  margins: 5 }
-                        text: "Food Lifetime:"
-                    }
+                        Text {
+                            id: foodcnttxt
+                            text: "Food Count:"
+                        }
 
-                    SpinBox {
-                        id: foodexpbox
-                        width: 65
-                        anchors {  margins: 5 }
-                        maximumValue: 999
-                        minimumValue: 1
-                        value: 25
+                        SpinBox {
+                            id: foodcntbox
+                            objectName: "defaultFoodCountCombo"
+                            maximumValue: 999
+                            minimumValue: 1
+                            value: 75
+                        }
+
+                        Text {
+                            id: foodexptxt
+                            text: "Food Life:"
+                        }
+
+                        SpinBox {
+                            id: foodexpbox
+                            objectName: "defaultFoodLifetimeCombo"
+                            maximumValue: 999
+                            minimumValue: 1
+                            value: 125
+                        }
                     }
                 }
             }

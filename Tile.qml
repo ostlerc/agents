@@ -4,7 +4,8 @@ Rectangle {
     id: tile
     property int type: 0
     property int index: 0
-    property int food: 0
+    property int count: 0
+    property int life: 0
     property bool solution: false
     property bool selected: false
     width: 25
@@ -14,7 +15,7 @@ Rectangle {
         return "white"
         else if (type == 1) // wall
         return "black"
-        else if (type == 2) // home
+        else if (type == 2) // nest
         return "brown"
         else if (type == 3) // food
         return "green"
@@ -34,8 +35,8 @@ Rectangle {
         anchors.centerIn: parent
         font.pixelSize: 10
         color: "white"
-        visible: tile.type == 3
-        text: food
+        visible: tile.type == 3 || tile.type == 2
+        text: count
     }
     border.width: 5
     MouseArea {
@@ -53,28 +54,32 @@ Rectangle {
                 grid.clearGrid()
             }
 
-            if (grid.home != null) {
+            if (grid.nest != null) {
                 if (type == 0) {
                     type = 1 //wall
                 } else if (type == 1) {
                     type = 3 //food
+                    count = grid.foodCount()
+                    life = grid.foodLife()
                 } else {
                     type  = 0 //open
                 }
             } else {
-                if (grid.home == null) {
+                if (grid.nest == null) {
                     if (type == 3) {
                         type = 0
                     } else {
-                        grid.setHome(index)
+                        grid.setNest(index)
+                        count = 10 //default ant count
                         type = 2
                     }
                 }
             }
 
             if (oldType == 2) {
-                grid.clearHome()
+                grid.clearNest()
             } 
+            grid.updateStatus()
         }
     }
 }

@@ -40,6 +40,10 @@ func run() error {
 	grid.Grid = win.Root().ObjectByName("grid")
 	grid.RunBtn = win.Root().ObjectByName("runBtn")
 	grid.StatusText = win.Root().ObjectByName("statusText")
+	grid.DefFoodCnt = win.Root().ObjectByName("defaultFoodCountCombo")
+	grid.FoodCnt = win.Root().ObjectByName("countSpinner")
+	grid.LifeCnt = win.Root().ObjectByName("lifeSpinner")
+	grid.FoodTime = win.Root().ObjectByName("defaultFoodLifetimeCombo")
 	grid.TileComp = &Tile{Object: tileComponent}
 	grid.BuildGrid()
 
