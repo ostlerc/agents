@@ -200,7 +200,7 @@ func (g *Grid) LoadGrid(filename string) {
 
 		switch t.Type {
 		case 2: //next
-			g.Nest = &g.Tiles[t.Index]
+			g.SetNest(t.Index)
 		}
 	}
 	fmt.Println("Successfully Loaded", filename)
@@ -212,13 +212,12 @@ func (g *Grid) BuildGrid() {
 		b.Object.Set("visible", false)
 		b.Object.Destroy()
 	}
-	g.Nest = nil
+	g.ClearNest()
 	g.RowCount = g.Rows.Int("value")
 	g.ColCount = g.Cols.Int("value")
 	g.Grid.Set("columns", g.ColCount)
 	g.RunBtn.Set("visible", false)
 	g.ResetStatus()
-	g.Nest = nil
 	g.Selected = nil
 
 	fmt.Println("Building a", g.RowCount, g.ColCount, "grid")
