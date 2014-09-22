@@ -1,17 +1,18 @@
 package main
 
-import (
-	"math"
+import "gopkg.in/qml.v1"
 
-	"gopkg.in/qml.v1"
-)
-
-type Tile struct {
-	Object     qml.Object
-	diagonal   bool
-	dneighbors map[Node]float64
+type Node interface {
+	Neighbors() []Node
 }
 
+type Tile struct {
+	Object    qml.Object
+	diagonal  bool
+	neighbors map[Node]float64
+}
+
+//TODO: maybe remove this
 func (t *Tile) Pos() (float64, float64) {
 	i := t.Object.Int("index")
 	x := float64(i % grid.ColCount)
@@ -21,14 +22,14 @@ func (t *Tile) Pos() (float64, float64) {
 
 func (t *Tile) Neighbors() []Node {
 	neighbors := make([]Node, 0, 8)
-	t.dneighbors = make(map[Node]float64)
+	t.neighbors = make(map[Node]float64)
 	cost := 1.0
 	i := t.Object.Int("index")
 
 	add := func(i int) {
 		if grid.Tiles[i].Object.Int("type") != 1 {
 			neighbors = append(neighbors, grid.Tiles[i])
-			t.dneighbors[grid.Tiles[i]] = cost
+			t.neighbors[grid.Tiles[i]] = cost
 		}
 	}
 
@@ -68,20 +69,4 @@ func (t *Tile) Neighbors() []Node {
 		}
 	}
 	return neighbors
-}
-
-func (t *Tile) Dist(n Node) float64 {
-	if v, ok := t.dneighbors[n]; ok {
-		return v
-	}
-	panic("Incorrect non neighbor node")
-}
-
-func (t *Tile) EstimatedCost(g Node) float64 {
-	tx, ty := t.Pos()
-	gx, gy := g.(*Tile).Pos()
-	if t.diagonal {
-		return math.Max(math.Abs(tx-gx), math.Abs(ty-gy))
-	}
-	return math.Abs(tx-gx) + math.Abs(ty-gy)
 }

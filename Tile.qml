@@ -5,17 +5,17 @@ Rectangle {
     property int type: 0
     property int index: 0
     property bool solution: false
-    width: 20
-    height: 20
+    width: 25
+    height: 25
     color: {
-        if (type == 0) //open
+        if (type == 0) // open
         return "white"
-        else if (type == 1) //wall
+        else if (type == 1) // wall
         return "black"
-        else if (type == 2) //start
+        else if (type == 2) // home
+        return "brown"
+        else if (type == 3) // food
         return "green"
-        else //end
-        return "red"
     }
     border.color: {
         if (grid.Edited || !solution) {
@@ -24,39 +24,49 @@ Rectangle {
         }
         return "blue"
     }
+    Text {
+        anchors.centerIn: parent
+        font.pixelSize: 10
+        color: "white"
+        visible: tile.type == 3
+        text: "14"
+    }
     border.width: 5
     MouseArea {
         id: mouseArea
         anchors.fill: parent
+        hoverEnabled: true
+        onEntered: {
+            grid.setStatus("hi" + type)
+        }
         onClicked: {
             var oldType = type
-            grid.clearGrid()
+            if(!grid.edited) {
+                grid.clearGrid()
+            }
 
-            if (grid.start != null && grid.end != null) {
+            if (grid.home != null) {
                 if (type == 0) {
                     type = 1 //wall
+                } else if (type == 1) {
+                    type = 3 //food
                 } else {
                     type  = 0 //open
                 }
             } else {
-                if (grid.start == null) {
+                if (grid.home == null) {
                     if (type == 3) {
                         type = 0
                     } else {
-                        grid.setStart(index)
+                        grid.setHome(index)
                         type = 2
                     }
-                } else if (grid.end == null) {
-                    grid.setEnd(index)
-                    type = 3
                 }
             }
 
             if (oldType == 2) {
-                grid.clearStart()
-            } else if (oldType == 3) {
-                grid.clearEnd()
-            }
+                grid.clearHome()
+            } 
         }
     }
 }

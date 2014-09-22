@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"strconv"
-	"time"
 
 	"gopkg.in/qml.v1"
 )
@@ -18,28 +16,17 @@ type Grid struct {
 	Edited     bool
 	ColCount   int
 	RowCount   int
-	Start      *Tile
-	End        *Tile
+	Home       *Tile
 	StatusText qml.Object
 }
 
-func (g *Grid) SetStart(i int) {
-	g.Start = g.Tiles[i]
-	g.RunBtn.Set("enabled", g.Start != nil && g.End != nil)
+func (g *Grid) SetHome(i int) {
+	g.Home = g.Tiles[i]
+	g.RunBtn.Set("enabled", g.Home != nil)
 }
 
-func (g *Grid) SetEnd(i int) {
-	g.End = g.Tiles[i]
-	g.RunBtn.Set("enabled", g.Start != nil && g.End != nil)
-}
-
-func (g *Grid) ClearStart() {
-	g.Start = nil
-	g.RunBtn.Set("enabled", false)
-}
-
-func (g *Grid) ClearEnd() {
-	g.End = nil
+func (g *Grid) ClearHome() {
+	g.Home = nil
 	g.RunBtn.Set("enabled", false)
 }
 
@@ -59,13 +46,12 @@ func (g *Grid) BuildGrid() {
 			b.Object.Destroy()
 		}
 	}
-	g.Start = nil
-	g.End = nil
+	g.Home = nil
 	g.RowCount = g.Rows.Int("value")
 	g.ColCount = g.Cols.Int("value")
 	g.Grid.Set("columns", g.ColCount)
 	g.RunBtn.Set("enabled", false)
-	g.StatusText.Set("text", "Click the grid cells to make a start, end, and walls.")
+	g.StatusText.Set("text", "Click the grid cells to make a Home, end, and walls.")
 
 	fmt.Println("Building a", g.RowCount, g.ColCount, "grid")
 	size := g.RowCount * g.ColCount
@@ -76,29 +62,8 @@ func (g *Grid) BuildGrid() {
 	}
 }
 
-func (g *Grid) RunAStar() {
-	g.ClearGrid()
-	nodes := make([]Node, len(g.Tiles), len(g.Tiles))
-	for i, v := range g.Tiles {
-		nodes[i] = v
-	}
-	graph := NewAstar(nodes)
-	start := time.Now()
-	path, err := graph.CalculatePath(g.Start, g.End)
-	if err != nil {
-		panic(err)
-	}
-	elapsed := time.Since(start)
-	statusStr :=
-		strconv.Itoa(int(elapsed.Nanoseconds()/1000)) + " μs - " +
-			strconv.Itoa(graph.WorkDone()) + " nodes evaluated - " +
-			strconv.Itoa(len(path)) + " path nodes"
-	if len(path) == 0 {
-		g.StatusText.Set("text", "No valid path. "+statusStr)
-	} else {
-		g.StatusText.Set("text", statusStr)
-	}
-	g.colorSolution(path)
+func (g *Grid) SetStatus(s string) {
+	g.StatusText.Set("text", s)
 }
 
 func (g *Grid) ClearGrid() {
