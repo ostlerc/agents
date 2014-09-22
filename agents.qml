@@ -28,7 +28,7 @@ ApplicationWindow {
                         Text {
                             id: statusText
                             objectName: "statusText"
-                            text: "Click the grid cells to make a Nest, food, and walls."
+                            text: "Click the grid cells to make a Nest, food, and walls. Right click to inspect."
                         }
                         Text {
                             text: "count:"

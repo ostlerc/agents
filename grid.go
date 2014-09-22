@@ -33,6 +33,8 @@ type Grid struct {
 type JSONGrid struct {
 	Rows  int        `json:"rows"`
 	Cols  int        `json:"cols"`
+	Food  int        `json:"food"`
+	Life  int        `json:"life"`
 	Tiles []JSONTile `json:"tiles"`
 }
 
@@ -75,7 +77,7 @@ func (g *Grid) ClearNest() {
 func (g *Grid) ResetStatus() {
 	g.FoodCnt.Set("visible", false)
 	g.LifeCnt.Set("visible", false)
-	g.StatusText.Set("text", "Click the grid cells to make a Nest, food, and walls.")
+	g.StatusText.Set("text", "Click the grid cells to make a Nest, food, and walls. Right click to inspect.")
 }
 
 func (g *Grid) SetSelected(i int) {
@@ -144,6 +146,8 @@ func (g *Grid) SaveGrid(filename string) {
 	jg := &JSONGrid{
 		Rows: g.RowCount,
 		Cols: g.ColCount,
+		Food: g.FoodCount(),
+		Life: g.FoodLife(),
 	}
 	tiles := make([]JSONTile, 0, jg.Rows*jg.Cols)
 
@@ -192,6 +196,8 @@ func (g *Grid) LoadGrid(filename string) {
 	}
 	g.Rows.Set("value", newg.Rows)
 	g.Cols.Set("value", newg.Cols)
+	g.DefFoodCnt.Set("value", newg.Food)
+	g.FoodTime.Set("value", newg.Life)
 	g.BuildGrid()
 	for _, t := range newg.Tiles {
 		g.Tiles[t.Index].Object.Set("type", t.Type)
