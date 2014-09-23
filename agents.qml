@@ -142,6 +142,7 @@ ApplicationWindow {
                         SpinBox {
                             id: colRect
                             objectName: "cols"
+                            Layout.minimumWidth: 42
                             maximumValue: 99
                             minimumValue: 1
                             value: 25
@@ -153,6 +154,7 @@ ApplicationWindow {
                         SpinBox {
                             id: rowRect
                             objectName: "rows"
+                            Layout.minimumWidth: 42
                             maximumValue: 99
                             minimumValue: 1
                             value: 25
@@ -167,6 +169,7 @@ ApplicationWindow {
                         SpinBox {
                             id: foodcntbox
                             objectName: "defaultFoodCountCombo"
+                            Layout.minimumWidth: 50
                             maximumValue: 999
                             minimumValue: 1
                             value: 75
@@ -178,6 +181,7 @@ ApplicationWindow {
                         SpinBox {
                             id: foodexpbox
                             objectName: "defaultFoodLifetimeCombo"
+                            Layout.minimumWidth: 50
                             maximumValue: 999
                             minimumValue: 1
                             value: 125
