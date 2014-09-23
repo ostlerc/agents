@@ -34,9 +34,29 @@ func (t *Tile) Snatch() Food {
 }
 
 func (t *Tile) Enter() {
+	typ := t.Object.Int("type")
+	if typ != 0 && typ != 4 { //open or ant
+		return //no counting necessary
+	}
+
+	c := t.Object.Int("count")
+	t.Object.Set("count", c+1)
+	t.Object.Set("type", 4) //ant
 }
 
 func (t *Tile) Exit() {
+	typ := t.Object.Int("type")
+	if typ != 0 && typ != 4 { //open or ant
+		return //no counting necessary
+	}
+
+	c := t.Object.Int("count")
+	t.Object.Set("count", c+1)
+	if c == 0 {
+		t.Object.Set("type", 0) //open
+	} else {
+		t.Object.Set("type", 4) //ant
+	}
 }
 
 func (t *Tile) Drop(Food) {

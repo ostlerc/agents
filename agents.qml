@@ -4,7 +4,7 @@ import QtQuick.Layouts 1.1
 import QtQuick.Dialogs 1.0
 
 ApplicationWindow {
-    width: 800
+    width: 850
     height: 600
     color: "white"
     TabView {
@@ -67,6 +67,7 @@ ApplicationWindow {
                     Layout.fillWidth: true
                     Flickable {
                         clip: true
+                        boundsBehavior: Flickable.StopAtBounds
                         anchors.centerIn: parent
                         width: { return Math.min(parent.width, g.width) }
                         height: { return Math.min(parent.height, g.height) }

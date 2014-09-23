@@ -18,9 +18,9 @@ Rectangle {
         else if (type == 2) // nest
         return "brown"
         else if (type == 3) // food
-        return "green"
+            return "green"
         else if (type == 4) // ant
-        return "orange"
+        return Qt.rgba(.1*count, 0, .1*count, 1)
     }
     border.color: {
         if (!grid.Edited) {
