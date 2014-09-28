@@ -5,14 +5,19 @@ Rectangle {
     property int type: 0
     property int index: 0
     property int count: 0
+    property int antcount: 0
+    property int pcount: 0
     property int life: 0
     property bool solution: false
     property bool selected: false
     width: 25
     height: 25
     color: {
-        if (type == 0) // open
-        return "white"
+        if (type == 0) { // open
+            var n = 20
+            var c = Math.max(0, (n-pcount)*(1/n))
+            return Qt.rgba(1, c, c)
+        }
         else if (type == 1) // wall
         return "black"
         else if (type == 2) // nest
@@ -36,9 +41,9 @@ Rectangle {
     Text {
         anchors.centerIn: parent
         font.pixelSize: 10
-        color: "white"
-        visible: tile.type == 3 || tile.type == 2
-        text: count
+        color: type == 0 ? "black" : "white"
+        visible: count != 0 || antcount != 0
+        text: antcount == 0 ? count : antcount
     }
     border.width: 5
     MouseArea {

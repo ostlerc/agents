@@ -39,7 +39,6 @@ func run() error {
 	grid.Rows = win.Root().ObjectByName("rows")
 	grid.Cols = win.Root().ObjectByName("cols")
 	grid.Grid = win.Root().ObjectByName("grid")
-	grid.RunBtn = win.Root().ObjectByName("runBtn")
 	grid.StatusText = win.Root().ObjectByName("statusText")
 	grid.DefFoodCnt = win.Root().ObjectByName("defaultFoodCountCombo")
 	grid.FoodCnt = win.Root().ObjectByName("countSpinner")

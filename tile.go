@@ -1,10 +1,16 @@
 package main
 
-import "gopkg.in/qml.v1"
+import (
+	"fmt"
+
+	"gopkg.in/qml.v1"
+)
 
 type Tile struct {
 	Object   qml.Object
 	diagonal bool
+	x        int
+	y        int
 }
 
 type JSONTile struct {
@@ -22,44 +28,48 @@ func (t *Tile) Pos() (int, int) {
 	return x, y
 }
 
-func (t *Tile) Mark(int, int) {
+func (t *Tile) Mark(x, y int) {
+	t.x, t.y = x, y
+	t.Object.Set("pcount", t.x)
 }
 
 func (t *Tile) Sniff() (int, int) {
-	return 0, 0
+	return t.x, t.y
+}
+
+func (t *Tile) HasFood() bool {
+	f := t.Object.Int("type")
+	c := t.Object.Int("count")
+	return f == 3 && c >= 0
 }
 
 func (t *Tile) Snatch() Food {
-	return Food{-1}
+	f := t.Object.Int("type")
+	c := t.Object.Int("count")
+	if f == 3 && c > 0 { //Food
+		t.Object.Set("count", c-1)
+		l := t.Object.Int("life")
+		if l-grid.Time <= 0 {
+			fmt.Println("Food Expired", grid.Time)
+			t.Object.Set("count", 0)
+		}
+		return Food{l}
+	}
+	return Food{0}
 }
 
 func (t *Tile) Enter() {
-	typ := t.Object.Int("type")
-	if typ != 0 && typ != 4 { //open or ant
-		return //no counting necessary
-	}
-
-	c := t.Object.Int("count")
-	t.Object.Set("count", c+1)
-	t.Object.Set("type", 4) //ant
+	c := t.Object.Int("antcount")
+	t.Object.Set("antcount", c+1)
 }
 
 func (t *Tile) Exit() {
-	typ := t.Object.Int("type")
-	if typ != 0 && typ != 4 { //open or ant
-		return //no counting necessary
-	}
-
-	c := t.Object.Int("count")
-	t.Object.Set("count", c+1)
-	if c == 0 {
-		t.Object.Set("type", 0) //open
-	} else {
-		t.Object.Set("type", 4) //ant
-	}
+	c := t.Object.Int("antcount")
+	t.Object.Set("antcount", c-1)
 }
 
 func (t *Tile) Drop(Food) {
+	grid.FoodQty++
 }
 
 func (t *Tile) Neighbors() []AntNode {

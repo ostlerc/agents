@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"math"
+	"time"
 
 	"gopkg.in/qml.v1"
 )
@@ -15,9 +17,11 @@ type Grid struct {
 	StatusText qml.Object
 	DefFoodCnt qml.Object
 	FoodTime   qml.Object
-	RunBtn     qml.Object
 	FoodCnt    qml.Object
 	LifeCnt    qml.Object
+	RunBtn     qml.Object
+	StepBtn    qml.Object
+	PauseBtn   qml.Object
 
 	TileComp *Tile
 	Nest     *Tile
@@ -28,6 +32,11 @@ type Grid struct {
 	Edited   bool
 	ColCount int
 	RowCount int
+	FoodQty  int
+
+	Time int
+
+	Ants []*Ant
 }
 
 type JSONGrid struct {
@@ -66,12 +75,10 @@ func (g *Grid) FoodLife() int {
 
 func (g *Grid) SetNest(i int) {
 	g.Nest = &g.Tiles[i]
-	g.RunBtn.Set("visible", g.Nest != nil)
 }
 
 func (g *Grid) ClearNest() {
 	g.Nest = nil
-	g.RunBtn.Set("visible", false)
 }
 
 func (g *Grid) ResetStatus() {
@@ -129,13 +136,14 @@ func (g *Grid) StatusFromTile(t *Tile) string {
 	case 3:
 		name = "food"
 	}
-	return fmt.Sprintf("%v", name)
+	return fmt.Sprintf("%v %v %v", name, t.x, t.y)
 }
 
 func (g *Grid) createTile() Tile {
 	tile := Tile{
 		Object:   g.TileComp.Object.Create(nil),
 		diagonal: true,
+		x:        1,
 	}
 	tile.Object.Set("parent", g.Grid)
 	return tile
@@ -212,6 +220,49 @@ func (g *Grid) LoadGrid(filename string) {
 	fmt.Println("Successfully Loaded", filename)
 }
 
+func (g *Grid) Assign(name string, o qml.Object) {
+	switch name {
+	case "Run":
+		g.RunBtn = o
+	case "Pause":
+		g.PauseBtn = o
+	case "Step":
+		g.StepBtn = o
+	default:
+		panic("Invalid name " + name)
+	}
+}
+
+func (g *Grid) RunClicked() {
+	g.Ants = make([]*Ant, 0)
+	for i := 1; i < g.Nest.Object.Int("count")+1; i++ {
+		a := &Ant{
+			id: int(math.Pow(2, float64(i))),
+			at: g.Nest,
+		}
+		fmt.Println("Created ant with id: ", a.id)
+		g.Ants = append(g.Ants, a)
+		g.Nest.Enter()
+	}
+
+	grid.Time = 0
+	grid.FoodQty = 0
+	go func() {
+		for {
+			g.StepClicked()
+		}
+	}()
+}
+
+func (g *Grid) StepClicked() {
+	//fmt.Println(grid.Time)
+	for _, ant := range g.Ants {
+		ant.Work()
+	}
+	time.Sleep(time.Duration(100) * time.Millisecond)
+	grid.Time++
+}
+
 func (g *Grid) BuildGrid() {
 	g.Edited = true
 	for _, b := range g.Tiles {
@@ -222,7 +273,6 @@ func (g *Grid) BuildGrid() {
 	g.RowCount = g.Rows.Int("value")
 	g.ColCount = g.Cols.Int("value")
 	g.Grid.Set("columns", g.ColCount)
-	g.RunBtn.Set("visible", false)
 	g.ResetStatus()
 	g.Selected = nil
 
