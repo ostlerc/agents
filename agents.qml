@@ -207,7 +207,7 @@ ApplicationWindow {
                             Button {
                                 text: "Step"
                                 Component.onCompleted: grid.assign("Step",this)
-                                onClicked: grid.stepClicked()
+                                onClicked: grid.step()
                                 enabled: false
                             }
                             Button {

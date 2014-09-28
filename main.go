@@ -7,8 +7,10 @@ import (
 	"gopkg.in/qml.v1"
 )
 
-var grid Grid
-var dialog qml.Object
+var (
+	grid   Grid
+	dialog qml.Object
+)
 
 func main() {
 	if err := qml.Run(run); err != nil {
@@ -45,9 +47,14 @@ func run() error {
 	grid.LifeCnt = win.Root().ObjectByName("lifeSpinner")
 	grid.FoodTime = win.Root().ObjectByName("defaultFoodLifetimeCombo")
 	grid.TileComp = &Tile{Object: tileComponent}
-	grid.BuildGrid()
 
 	dialog = win.Root().ObjectByName("fileDialog")
+
+	if len(os.Args) > 1 {
+		grid.LoadGrid(os.Args[1])
+	} else {
+		grid.BuildGrid()
+	}
 
 	win.Show()
 	win.Wait()

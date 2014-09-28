@@ -63,7 +63,7 @@ func (a *Ant) Decide() AntNode {
 	}
 	if carryingFood && a.at == grid.Nest {
 		a.at.Drop(a.food)
-		fmt.Println("dropped food at home ", grid.FoodQty, a.id, grid.Time)
+		fmt.Println("food drop", grid.FoodQty, grid.Time)
 		a.food = Food{0}
 		carryingFood = false
 	}

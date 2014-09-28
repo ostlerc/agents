@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"math"
+	"os"
 	"time"
 
 	"gopkg.in/qml.v1"
@@ -202,7 +203,9 @@ func (g *Grid) SaveGrid(filename string) {
 }
 
 func (g *Grid) LoadGrid(filename string) {
-	filename = filename[7:]
+	if _, err := os.Stat(filename); err != nil {
+		filename = filename[7:]
+	}
 	dat, err := ioutil.ReadFile(filename)
 	if err != nil {
 		fmt.Println(err)
@@ -270,24 +273,24 @@ func (g *Grid) RunClicked() {
 		g.Nest.Enter(false)
 	}
 
-	grid.MaxFood = 0
-	for _, t := range grid.Tiles {
-		grid.MaxFood += t.Food()
+	g.MaxFood = 0
+	for _, t := range g.Tiles {
+		g.MaxFood += t.Food()
 	}
 
-	grid.Time = 0
-	grid.FoodQty = 0
-	grid.StopChan = make(chan bool)
-	grid.PauseChan = make(chan bool)
-	go func(cancel, pause chan bool) {
+	g.Time = 0
+	g.FoodQty = 0
+	g.StopChan = make(chan bool)
+	g.PauseChan = make(chan bool)
+	go func() {
 		for {
 			select {
-			case <-cancel:
+			case <-g.StopChan:
 				g.PauseBtn.Set("enabled", false)
 				g.RunBtn.Set("text", "Run")
 				g.PauseBtn.Set("text", "Pause")
 				return
-			case <-pause:
+			case <-g.PauseChan:
 				v := g.PauseBtn.String("text")
 				if v == "Pause" {
 					g.PauseBtn.Set("text", "Unpause")
@@ -297,7 +300,7 @@ func (g *Grid) RunClicked() {
 					g.StepBtn.Set("enabled", false)
 				}
 				select {
-				case <-pause:
+				case <-g.PauseChan:
 					v := g.PauseBtn.String("text")
 					if v == "Pause" {
 						g.PauseBtn.Set("text", "Unpause")
@@ -306,20 +309,20 @@ func (g *Grid) RunClicked() {
 						g.PauseBtn.Set("text", "Pause")
 						g.StepBtn.Set("enabled", false)
 					}
-				case <-cancel:
+				case <-g.StopChan:
 					g.RunBtn.Set("text", "Run")
 					g.PauseBtn.Set("text", "Pause")
 					fmt.Println("stopping during pause")
 					return
 				}
 			default:
-				g.StepClicked()
+				g.Step()
 			}
 		}
-	}(grid.StopChan, grid.PauseChan)
+	}()
 }
 
-func (g *Grid) StepClicked() {
+func (g *Grid) Step() {
 	for _, ant := range g.Ants {
 		ant.Work()
 	}
