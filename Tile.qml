@@ -30,9 +30,11 @@ Rectangle {
     border.color: {
         if (!grid.Edited) {
             if(solution){
-                return "blue"
+                return "green"
             } else if(selected){
                 return "blue"
+            } else if(antcount != 0) {
+                return "brown"
             }
         }
         return "black"

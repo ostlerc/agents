@@ -256,7 +256,9 @@ func (g *Grid) Assign(name string, o qml.Object) {
 
 func (g *Grid) RunClicked() {
 	if g.RunBtn.String("text") == "Stop" {
-		g.StopChan <- true
+		go func() {
+			g.StopChan <- true
+		}()
 		return
 	}
 	g.RunBtn.Set("text", "Stop")
@@ -278,6 +280,8 @@ func (g *Grid) RunClicked() {
 		g.MaxFood += t.Food()
 	}
 
+	fmt.Println("Gathering", g.MaxFood, "Foods")
+
 	g.Time = 0
 	g.FoodQty = 0
 	g.StopChan = make(chan bool)
@@ -289,6 +293,7 @@ func (g *Grid) RunClicked() {
 				g.PauseBtn.Set("enabled", false)
 				g.RunBtn.Set("text", "Run")
 				g.PauseBtn.Set("text", "Pause")
+				g.ClearGrid()
 				return
 			case <-g.PauseChan:
 				v := g.PauseBtn.String("text")
@@ -299,7 +304,7 @@ func (g *Grid) RunClicked() {
 					g.PauseBtn.Set("text", "Pause")
 					g.StepBtn.Set("enabled", false)
 				}
-				select {
+				select { //pause means no default in select
 				case <-g.PauseChan:
 					v := g.PauseBtn.String("text")
 					if v == "Pause" {
@@ -312,7 +317,7 @@ func (g *Grid) RunClicked() {
 				case <-g.StopChan:
 					g.RunBtn.Set("text", "Run")
 					g.PauseBtn.Set("text", "Pause")
-					fmt.Println("stopping during pause")
+					g.ClearGrid()
 					return
 				}
 			default:
@@ -332,8 +337,10 @@ func (g *Grid) Step() {
 	grid.Time++
 
 	if grid.FoodQty == grid.MaxFood {
-		fmt.Println("Finished gatherin ", grid.FoodQty, " in ", grid.Time)
-		grid.StopChan <- true
+		fmt.Println("Gathered", grid.FoodQty, "in", grid.Time, "steps")
+		go func() {
+			grid.StopChan <- true
+		}()
 	}
 }
 

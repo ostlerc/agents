@@ -50,17 +50,21 @@ func (t *Tile) Snatch() Food {
 	f := t.Object.Int("type")
 	c := t.Object.Int("count")
 	if f == 3 && c > 0 { //Food
-		t.Object.Set("count", c-1)
 		l := t.Object.Int("life")
 		if l-grid.Time <= 0 {
 			grid.MaxFood -= c
+			t.Object.Set("count", 0)
 			fmt.Println("Food Expired", c, grid.Time)
+			return Food{0}
 		}
 
-		if t.Object.Int("count") <= 0 {
+		t.Object.Set("count", c-1)
+
+		if c <= 0 {
 			t.Object.Set("count", 0)
 			t.Object.Set("type", 0)
 			t.Object.Set("life", 0)
+			return Food{0}
 		}
 		return Food{l}
 	}

@@ -7,9 +7,7 @@ import (
 )
 
 type Worker interface {
-	Work()         // Do a step of work
-	Result() []int // Returns work done (inspected usually after all work is done)
-	Clear()        // Reset state
+	Work() // Do a step of work
 }
 
 type AntNode interface {
@@ -60,6 +58,10 @@ func (a *Ant) Decide() AntNode {
 		}
 		a.food = a.at.Snatch()
 		carryingFood = a.food.life-grid.Time > 0
+		if !carryingFood && a.food.life > 0 {
+			fmt.Println("My food expired!")
+			grid.MaxFood--
+		}
 	}
 	if carryingFood && a.at == grid.Nest {
 		a.at.Drop(a.food)
