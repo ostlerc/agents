@@ -37,10 +37,13 @@ func (t *Tile) Sniff() (int, int) {
 	return t.x, t.y
 }
 
-func (t *Tile) HasFood() bool {
+func (t *Tile) Food() int {
 	f := t.Object.Int("type")
 	c := t.Object.Int("count")
-	return f == 3 && c >= 0
+	if f != 3 {
+		return 0
+	}
+	return c
 }
 
 func (t *Tile) Snatch() Food {
@@ -50,22 +53,30 @@ func (t *Tile) Snatch() Food {
 		t.Object.Set("count", c-1)
 		l := t.Object.Int("life")
 		if l-grid.Time <= 0 {
-			fmt.Println("Food Expired", grid.Time)
+			grid.MaxFood -= c
+			fmt.Println("Food Expired", c, grid.Time)
+		}
+
+		if t.Object.Int("count") <= 0 {
 			t.Object.Set("count", 0)
+			t.Object.Set("type", 0)
+			t.Object.Set("life", 0)
 		}
 		return Food{l}
 	}
 	return Food{0}
 }
 
-func (t *Tile) Enter() {
+func (t *Tile) Enter(food bool) {
 	c := t.Object.Int("antcount")
 	t.Object.Set("antcount", c+1)
+	t.Object.Set("solution", food)
 }
 
 func (t *Tile) Exit() {
 	c := t.Object.Int("antcount")
 	t.Object.Set("antcount", c-1)
+	t.Object.Set("solution", false)
 }
 
 func (t *Tile) Drop(Food) {

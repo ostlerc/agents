@@ -23,13 +23,12 @@ Rectangle {
         else if (type == 2) // nest
         return "brown"
         else if (type == 3) // food
-            return "green"
+        return "green"
         else if (type == 4) // ant
         return Qt.rgba(.1*count, 0, .1*count, 1)
     }
     border.color: {
         if (!grid.Edited) {
-            solution = false
             if(solution){
                 return "blue"
             } else if(selected){
@@ -61,6 +60,9 @@ Rectangle {
                 grid.clearGrid()
             }
 
+            count = 0
+            life = 0
+
             if (grid.nest != null) {
                 if (type == 0) {
                     type = 1 //wall
@@ -69,7 +71,7 @@ Rectangle {
                     count = grid.foodCount()
                     life = grid.foodLife()
                 } else {
-                    type  = 0 //open
+                    type = 0 //open
                 }
             } else {
                 if (grid.nest == null) {

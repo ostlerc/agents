@@ -198,7 +198,9 @@ ApplicationWindow {
                             anchors.fill: parent
 
                             Button {
+                                id: simRunBtn
                                 text: "Run"
+                                enabled: grid.nest != null
                                 Component.onCompleted: grid.assign("Run",this)
                                 onClicked: grid.runClicked()
                             }
@@ -206,13 +208,40 @@ ApplicationWindow {
                                 text: "Step"
                                 Component.onCompleted: grid.assign("Step",this)
                                 onClicked: grid.stepClicked()
+                                enabled: false
                             }
                             Button {
                                 text: "Pause"
                                 Component.onCompleted: grid.assign("Pause",this)
+                                onClicked: grid.pauseClicked()
+                                enabled: false
+                            }
+                            Text {
+                                text: "Delay ms"
+                            }
+                            SpinBox {
+                                Component.onCompleted: grid.assign("delaySpinner", this)
+                                Layout.minimumWidth: 50
+                                maximumValue: 999
+                                minimumValue: 1
+                                value: 100
                             }
                             Rectangle {
                                 Layout.fillWidth: true
+                            }
+                            Text {
+                                text: "Time:"
+                            }
+                            Text {
+                                Component.onCompleted: grid.assign("simStatus", this)
+                                text: "0"
+                            }
+                            Text {
+                                text: "Food Gathered:"
+                            }
+                            Text {
+                                Component.onCompleted: grid.assign("foodStatus", this)
+                                text: "0"
                             }
                         }
                     }

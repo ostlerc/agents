@@ -11,17 +11,20 @@ import (
 )
 
 type Grid struct {
-	Rows       qml.Object
-	Cols       qml.Object
-	Grid       qml.Object
-	StatusText qml.Object
-	DefFoodCnt qml.Object
-	FoodTime   qml.Object
-	FoodCnt    qml.Object
-	LifeCnt    qml.Object
-	RunBtn     qml.Object
-	StepBtn    qml.Object
-	PauseBtn   qml.Object
+	Rows         qml.Object
+	Cols         qml.Object
+	Grid         qml.Object
+	StatusText   qml.Object
+	DefFoodCnt   qml.Object
+	FoodTime     qml.Object
+	FoodCnt      qml.Object
+	LifeCnt      qml.Object
+	RunBtn       qml.Object
+	StepBtn      qml.Object
+	PauseBtn     qml.Object
+	SimText      qml.Object
+	FoodText     qml.Object
+	DelaySpinner qml.Object
 
 	TileComp *Tile
 	Nest     *Tile
@@ -29,10 +32,13 @@ type Grid struct {
 
 	Tiles []Tile
 
-	Edited   bool
-	ColCount int
-	RowCount int
-	FoodQty  int
+	Edited    bool
+	ColCount  int
+	RowCount  int
+	FoodQty   int
+	MaxFood   int
+	StopChan  chan bool
+	PauseChan chan bool
 
 	Time int
 
@@ -75,10 +81,16 @@ func (g *Grid) FoodLife() int {
 
 func (g *Grid) SetNest(i int) {
 	g.Nest = &g.Tiles[i]
+	if g.RunBtn != nil {
+		g.RunBtn.Set("enabled", g.Nest != nil)
+	}
 }
 
 func (g *Grid) ClearNest() {
 	g.Nest = nil
+	if g.RunBtn != nil {
+		g.RunBtn.Set("enabled", false)
+	}
 }
 
 func (g *Grid) ResetStatus() {
@@ -228,12 +240,25 @@ func (g *Grid) Assign(name string, o qml.Object) {
 		g.PauseBtn = o
 	case "Step":
 		g.StepBtn = o
+	case "simStatus":
+		g.SimText = o
+	case "foodStatus":
+		g.FoodText = o
+	case "delaySpinner":
+		g.DelaySpinner = o
 	default:
 		panic("Invalid name " + name)
 	}
 }
 
 func (g *Grid) RunClicked() {
+	if g.RunBtn.String("text") == "Stop" {
+		g.StopChan <- true
+		return
+	}
+	g.RunBtn.Set("text", "Stop")
+	g.PauseBtn.Set("enabled", true)
+
 	g.Ants = make([]*Ant, 0)
 	for i := 1; i < g.Nest.Object.Int("count")+1; i++ {
 		a := &Ant{
@@ -242,25 +267,77 @@ func (g *Grid) RunClicked() {
 		}
 		fmt.Println("Created ant with id: ", a.id)
 		g.Ants = append(g.Ants, a)
-		g.Nest.Enter()
+		g.Nest.Enter(false)
+	}
+
+	grid.MaxFood = 0
+	for _, t := range grid.Tiles {
+		grid.MaxFood += t.Food()
 	}
 
 	grid.Time = 0
 	grid.FoodQty = 0
-	go func() {
+	grid.StopChan = make(chan bool)
+	grid.PauseChan = make(chan bool)
+	go func(cancel, pause chan bool) {
 		for {
-			g.StepClicked()
+			select {
+			case <-cancel:
+				g.PauseBtn.Set("enabled", false)
+				g.RunBtn.Set("text", "Run")
+				g.PauseBtn.Set("text", "Pause")
+				return
+			case <-pause:
+				v := g.PauseBtn.String("text")
+				if v == "Pause" {
+					g.PauseBtn.Set("text", "Unpause")
+					g.StepBtn.Set("enabled", true)
+				} else {
+					g.PauseBtn.Set("text", "Pause")
+					g.StepBtn.Set("enabled", false)
+				}
+				select {
+				case <-pause:
+					v := g.PauseBtn.String("text")
+					if v == "Pause" {
+						g.PauseBtn.Set("text", "Unpause")
+						g.StepBtn.Set("enabled", true)
+					} else {
+						g.PauseBtn.Set("text", "Pause")
+						g.StepBtn.Set("enabled", false)
+					}
+				case <-cancel:
+					g.RunBtn.Set("text", "Run")
+					g.PauseBtn.Set("text", "Pause")
+					fmt.Println("stopping during pause")
+					return
+				}
+			default:
+				g.StepClicked()
+			}
 		}
-	}()
+	}(grid.StopChan, grid.PauseChan)
 }
 
 func (g *Grid) StepClicked() {
-	//fmt.Println(grid.Time)
 	for _, ant := range g.Ants {
 		ant.Work()
 	}
-	time.Sleep(time.Duration(100) * time.Millisecond)
+	g.SimText.Set("text", grid.Time)
+	g.FoodText.Set("text", grid.FoodQty)
+	time.Sleep(time.Duration(grid.DelaySpinner.Int("value")) * time.Millisecond)
 	grid.Time++
+
+	if grid.FoodQty == grid.MaxFood {
+		fmt.Println("Finished gatherin ", grid.FoodQty, " in ", grid.Time)
+		grid.StopChan <- true
+	}
+}
+
+func (g *Grid) PauseClicked() {
+	go func() {
+		g.PauseChan <- true
+	}()
 }
 
 func (g *Grid) BuildGrid() {
@@ -289,6 +366,20 @@ func (g *Grid) ClearGrid() {
 	g.Edited = true
 	for _, v := range g.Tiles {
 		v.Object.Set("solution", false)
+		t := v.Object.Int("type")
+		c := 0
+		l := 0
+		if t == 2 {
+			c = 10
+		} else if t == 3 {
+			c = g.DefFoodCnt.Int("value")
+			l = g.FoodTime.Int("value")
+		}
+		v.Object.Set("count", c)
+		v.Object.Set("life", l)
+		v.Object.Set("pcount", 0)
+		v.Object.Set("selected", 0)
+		v.Object.Set("antcount", 0)
 	}
 }
 

@@ -18,14 +18,14 @@ type AntNode interface {
 	Pos() (int, int)
 	Neighbors() []AntNode
 	Snatch() Food
-	HasFood() bool
+	Food() int
 	Drop(Food)
-	Enter()
+	Enter(bool)
 	Exit()
 }
 
 func init() {
-	rand.Seed(0)
+	rand.Seed(52 * 1332)
 }
 
 type Food struct {
@@ -41,7 +41,7 @@ type Ant struct {
 func (a *Ant) Work() {
 	a.at.Exit()
 	a.at = a.Decide()
-	a.at.Enter()
+	a.at.Enter(a.food.life-grid.Time > 0)
 }
 
 func (a *Ant) Decide() AntNode {
@@ -54,36 +54,51 @@ func (a *Ant) Decide() AntNode {
 
 	//If We are not carrying food, check
 	if !carryingFood {
+		if a.food.life > 0 {
+			fmt.Println("My food expired!")
+			grid.MaxFood--
+		}
 		a.food = a.at.Snatch()
 		carryingFood = a.food.life-grid.Time > 0
 	}
 	if carryingFood && a.at == grid.Nest {
 		a.at.Drop(a.food)
-		fmt.Println("dropped food at home ", grid.FoodQty, a.id)
+		fmt.Println("dropped food at home ", grid.FoodQty, a.id, grid.Time)
 		a.food = Food{0}
 		carryingFood = false
 	}
 
 	for _, n := range n {
+		_, m2 := n.Sniff()
+
 		if carryingFood {
 			if n == grid.Nest {
 				choice = n
 				break
 			}
-		} else if n.HasFood() {
+			if m2&a.id == a.id {
+				if choice == nil {
+					choice = n
+				}
+			}
+		} else if n.Food() > 0 {
 			choice = n
-			break
 		}
+	}
+
+	if choice == nil && carryingFood { //food trail gone cold
+		x = 1
+		y &^= a.id
+		carryingFood = false
 	}
 
 	if choice == nil {
 		for _, n := range n {
 			m1, m2 := n.Sniff()
 
-			if m2&a.id == a.id && !carryingFood { //lower priority somewhere we've already been
+			if m2&a.id == a.id { //lower priority somewhere we've already been
 				m1 = 0
 			}
-
 			if _, ok := p[m1]; !ok {
 				p[m1] = make([]AntNode, 0)
 				best = append(best, m1)
@@ -93,14 +108,15 @@ func (a *Ant) Decide() AntNode {
 	}
 
 	if carryingFood {
+		y |= 1 //mark as food trail, remove id token
 		y &^= a.id
 		x = x + 1
 	} else {
 		if a.food.life != 0 { //food expired mid transfer so drop food and set trail to cold
-			x = 1
-			a.food = Food{0}
+			y &^= a.id
+		} else {
+			y = y | a.id
 		}
-		y = y | a.id
 	}
 	a.at.Mark(x, y)
 
