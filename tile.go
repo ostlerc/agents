@@ -75,7 +75,7 @@ func (t *Tile) Neighbors() []AntNode {
 
 	add := func(i int) {
 		if grid.Tiles[i].Object.Int("type") != 1 {
-			neighbors = append(neighbors, &grid.Tiles[i])
+			neighbors = append(neighbors, grid.Tiles[i])
 			//t.neighbors[&grid.Tiles[i]] = cost
 		}
 	}

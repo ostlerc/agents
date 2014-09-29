@@ -33,7 +33,7 @@ type Grid struct {
 	Nest     *Tile
 	Selected *Tile
 
-	Tiles []Tile
+	Tiles []*Tile
 
 	Edited   bool
 	ColCount int
@@ -84,7 +84,7 @@ func (g *Grid) FoodLife() int {
 }
 
 func (g *Grid) SetNest(i int) {
-	g.Nest = &g.Tiles[i]
+	g.Nest = g.Tiles[i]
 	if g.RunBtn != nil {
 		g.RunBtn.Set("enabled", g.Nest != nil)
 	}
@@ -106,13 +106,13 @@ func (g *Grid) ResetStatus() {
 func (g *Grid) SetSelected(i int) {
 	if g.Selected != nil {
 		g.Selected.Object.Set("selected", false)
-		if &g.Tiles[i] == g.Selected {
+		if g.Tiles[i] == g.Selected {
 			g.Selected = nil
 			g.ResetStatus()
 			return
 		}
 	}
-	g.Selected = &g.Tiles[i]
+	g.Selected = g.Tiles[i]
 	g.Selected.Object.Set("selected", true)
 	g.UpdateStatus()
 }
@@ -155,8 +155,8 @@ func (g *Grid) StatusFromTile(t *Tile) string {
 	return fmt.Sprintf("%v %v %v", name, t.x, t.y)
 }
 
-func (g *Grid) createTile() Tile {
-	tile := Tile{
+func (g *Grid) createTile() *Tile {
+	tile := &Tile{
 		Object:   g.TileComp.Object.Create(nil),
 		diagonal: true,
 		x:        1,
@@ -264,7 +264,6 @@ func (g *Grid) RunClicked() {
 		go func() {
 			g.StopChan <- true
 		}()
-		time.Sleep(time.Millisecond) //give some time to process the stop
 		return
 	}
 	g.RunBtn.Set("text", "Stop")
@@ -284,6 +283,7 @@ func (g *Grid) RunClicked() {
 	g.MaxFood = 0
 	for _, t := range g.Tiles {
 		g.MaxFood += t.Food()
+		t.Mark(0, 0)
 	}
 
 	fmt.Println("Gathering", g.MaxFood, "Foods")
@@ -394,7 +394,7 @@ func (g *Grid) BuildGrid() {
 
 	fmt.Println("Building a", g.RowCount, g.ColCount, "grid")
 	size := g.RowCount * g.ColCount
-	g.Tiles = make([]Tile, size, size)
+	g.Tiles = make([]*Tile, size, size)
 	for n := 0; n < size; n++ {
 		g.Tiles[n] = g.createTile()
 		g.Tiles[n].Object.Set("index", n)
@@ -419,11 +419,5 @@ func (g *Grid) ClearGrid() {
 		v.Object.Set("pcount", 0)
 		v.Object.Set("selected", 0)
 		v.Object.Set("antcount", 0)
-	}
-}
-
-func (g *Grid) colorSolution(objs []AntNode) {
-	for _, v := range objs {
-		v.(*Tile).Object.Set("solution", true)
 	}
 }
