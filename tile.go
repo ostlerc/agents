@@ -1,10 +1,6 @@
 package main
 
-import (
-	"fmt"
-
-	"gopkg.in/qml.v1"
-)
+import "gopkg.in/qml.v1"
 
 type Tile struct {
 	Object   qml.Object
@@ -50,23 +46,8 @@ func (t *Tile) Snatch() Food {
 	f := t.Object.Int("type")
 	c := t.Object.Int("count")
 	if f == 3 && c > 0 { //Food
-		l := t.Object.Int("life")
-		if l-grid.Time <= 0 {
-			grid.MaxFood -= c
-			t.Object.Set("count", 0)
-			fmt.Println("Food Expired", c, grid.Time)
-			return Food{0}
-		}
-
 		t.Object.Set("count", c-1)
-
-		if c <= 0 {
-			t.Object.Set("count", 0)
-			t.Object.Set("type", 0)
-			t.Object.Set("life", 0)
-			return Food{0}
-		}
-		return Food{l}
+		return Food{t.Object.Int("life")}
 	}
 	return Food{0}
 }

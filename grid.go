@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"math"
+	"math/rand"
 	"os"
 	"time"
 
@@ -26,6 +27,7 @@ type Grid struct {
 	SimText      qml.Object
 	FoodText     qml.Object
 	DelaySpinner qml.Object
+	GenerateFood qml.Object
 
 	TileComp *Tile
 	Nest     *Tile
@@ -33,11 +35,12 @@ type Grid struct {
 
 	Tiles []Tile
 
-	Edited    bool
-	ColCount  int
-	RowCount  int
-	FoodQty   int
-	MaxFood   int
+	Edited   bool
+	ColCount int
+	RowCount int
+	FoodQty  int
+	MaxFood  int
+
 	StopChan  chan bool
 	PauseChan chan bool
 
@@ -249,6 +252,8 @@ func (g *Grid) Assign(name string, o qml.Object) {
 		g.FoodText = o
 	case "delaySpinner":
 		g.DelaySpinner = o
+	case "foodGen":
+		g.GenerateFood = o
 	default:
 		panic("Invalid name " + name)
 	}
@@ -259,6 +264,7 @@ func (g *Grid) RunClicked() {
 		go func() {
 			g.StopChan <- true
 		}()
+		time.Sleep(time.Millisecond) //give some time to process the stop
 		return
 	}
 	g.RunBtn.Set("text", "Stop")
@@ -328,19 +334,42 @@ func (g *Grid) RunClicked() {
 }
 
 func (g *Grid) Step() {
+	genFood := g.GenerateFood.Bool("checked")
+	for _, tile := range g.Tiles {
+		if t := tile.Object.Int("type"); t == 3 {
+			l := tile.Object.Int("life")
+			c := tile.Object.Int("count")
+			if l-g.Time <= 0 || c == 0 {
+				g.MaxFood -= c
+				tile.Object.Set("count", 0)
+				tile.Object.Set("type", 0)
+				tile.Object.Set("life", 0)
+				fmt.Println(c, "Food Expired", g.Time)
+			}
+		} else if genFood && t == 0 && rand.Intn(5000) == 5 {
+			//randomly generate food
+			tile.Object.Set("type", 3)
+			c := rand.Intn(15)
+			g.MaxFood += c
+			tile.Object.Set("count", c)
+			tile.Object.Set("life", rand.Intn(100)+g.Time)
+		}
+	}
 	for _, ant := range g.Ants {
 		ant.Work()
 	}
-	g.SimText.Set("text", grid.Time)
-	g.FoodText.Set("text", grid.FoodQty)
-	time.Sleep(time.Duration(grid.DelaySpinner.Int("value")) * time.Millisecond)
-	grid.Time++
 
-	if grid.FoodQty == grid.MaxFood {
-		fmt.Println("Gathered", grid.FoodQty, "in", grid.Time, "steps")
+	g.SimText.Set("text", g.Time)
+	g.FoodText.Set("text", g.FoodQty)
+	time.Sleep(time.Duration(g.DelaySpinner.Int("value")) * time.Millisecond)
+	g.Time++
+
+	if g.FoodQty == g.MaxFood && !g.GenerateFood.Bool("checked") {
+		fmt.Println("Gathered", g.FoodQty, "in", g.Time, "steps")
 		go func() {
-			grid.StopChan <- true
+			g.StopChan <- true
 		}()
+		time.Sleep(time.Millisecond) //give some time to process the stop
 	}
 }
 

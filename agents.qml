@@ -226,6 +226,11 @@ ApplicationWindow {
                                 minimumValue: 1
                                 value: 100
                             }
+                            CheckBox {
+                                text: "continuously generate food"
+                                checked: false
+                                Component.onCompleted: grid.assign("foodGen", this)
+                            }
                             Rectangle {
                                 Layout.fillWidth: true
                             }
