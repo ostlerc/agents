@@ -266,6 +266,7 @@ func (g *Grid) RunClicked() {
 		}()
 		return
 	}
+	g.ClearGrid()
 	g.RunBtn.Set("text", "Stop")
 	g.PauseBtn.Set("enabled", true)
 
@@ -298,8 +299,8 @@ func (g *Grid) RunClicked() {
 			case <-g.StopChan:
 				g.PauseBtn.Set("enabled", false)
 				g.RunBtn.Set("text", "Run")
+				g.StepBtn.Set("enabled", false)
 				g.PauseBtn.Set("text", "Pause")
-				g.ClearGrid()
 				return
 			case <-g.PauseChan:
 				v := g.PauseBtn.String("text")
@@ -323,7 +324,8 @@ func (g *Grid) RunClicked() {
 				case <-g.StopChan:
 					g.RunBtn.Set("text", "Run")
 					g.PauseBtn.Set("text", "Pause")
-					g.ClearGrid()
+					g.PauseBtn.Set("enabled", false)
+					g.StepBtn.Set("enabled", false)
 					return
 				}
 			default:
