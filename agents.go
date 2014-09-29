@@ -18,6 +18,7 @@ type AntNode interface {
 	Snatch() Food
 	Food() int
 	Drop(Food)
+	Empty() bool //returns true if no other agents in the node
 	Enter(bool)
 	Exit()
 }
@@ -37,9 +38,12 @@ type Ant struct {
 }
 
 func (a *Ant) Work() {
-	a.at.Exit()
-	a.at = a.Decide()
-	a.at.Enter(a.food.life-grid.Time > 0)
+	next := a.Decide()
+	if a.at != next {
+		a.at.Exit()
+		a.at = next
+		a.at.Enter(a.food.life-grid.Time > 0)
+	}
 }
 
 func (a *Ant) Decide() AntNode {
@@ -70,10 +74,15 @@ func (a *Ant) Decide() AntNode {
 		carryingFood = false
 	}
 
+	choiceAvail := false
 	for _, n := range n {
 		_, m2 := n.Sniff()
 
+		if !n.Empty() {
+			continue
+		}
 		if carryingFood {
+			choiceAvail = true
 			if n == grid.Nest {
 				choice = n
 				break
@@ -88,7 +97,7 @@ func (a *Ant) Decide() AntNode {
 		}
 	}
 
-	if choice == nil && carryingFood { //food trail gone cold
+	if choice == nil && choiceAvail { //food trail gone cold
 		x = 1
 		y &^= a.id
 		carryingFood = false
@@ -96,6 +105,9 @@ func (a *Ant) Decide() AntNode {
 
 	if choice == nil {
 		for _, n := range n {
+			if !n.Empty() {
+				continue
+			}
 			m1, m2 := n.Sniff()
 
 			if m2&a.id == a.id { //lower priority somewhere we've already been
@@ -110,9 +122,10 @@ func (a *Ant) Decide() AntNode {
 	}
 
 	if carryingFood {
-		y |= 1 //mark as food trail, remove id token
-		y &^= a.id
-		x = x + 1
+		if choice != nil {
+			y &^= a.id
+			x = x + 1
+		}
 	} else {
 		if a.food.life != 0 { //food expired mid transfer so drop food and set trail to cold
 			y &^= a.id
@@ -126,6 +139,10 @@ func (a *Ant) Decide() AntNode {
 
 	if choice != nil {
 		return choice
+	}
+
+	if len(best) == 0 {
+		return a.at
 	}
 
 	sort.Sort(sort.Reverse(sort.IntSlice(best)))

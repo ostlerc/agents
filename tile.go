@@ -68,6 +68,10 @@ func (t *Tile) Drop(Food) {
 	grid.FoodQty++
 }
 
+func (t *Tile) Empty() bool {
+	return t.Object.Int("antcount") == 0
+}
+
 func (t *Tile) Neighbors() []AntNode {
 	neighbors := make([]AntNode, 0, 8)
 	//cost := 1.0

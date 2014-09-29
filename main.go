@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"os"
 
@@ -10,7 +11,12 @@ import (
 var (
 	grid   Grid
 	dialog qml.Object
+	file   = flag.String("file", "", "json map to load at startup")
 )
+
+func init() {
+	flag.Parse()
+}
 
 func main() {
 	if err := qml.Run(run); err != nil {
@@ -50,8 +56,8 @@ func run() error {
 
 	dialog = win.Root().ObjectByName("fileDialog")
 
-	if len(os.Args) > 1 {
-		grid.LoadGrid(os.Args[1])
+	if *file != "" {
+		grid.LoadGrid(*file)
 	} else {
 		grid.BuildGrid()
 	}

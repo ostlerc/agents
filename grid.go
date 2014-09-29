@@ -263,10 +263,10 @@ func (g *Grid) RunClicked() {
 	if g.RunBtn.String("text") == "Stop" {
 		go func() {
 			g.StopChan <- true
+			g.ClearGrid()
 		}()
 		return
 	}
-	g.ClearGrid()
 	g.RunBtn.Set("text", "Stop")
 	g.PauseBtn.Set("enabled", true)
 
@@ -410,8 +410,8 @@ func (g *Grid) ClearGrid() {
 		t := v.Object.Int("type")
 		c := 0
 		l := 0
-		if t == 2 {
-			c = 10
+		if t == 2 { //nest skip
+			continue
 		} else if t == 3 {
 			c = g.DefFoodCnt.Int("value")
 			l = g.FoodTime.Int("value")
