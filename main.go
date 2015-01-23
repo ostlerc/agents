@@ -9,9 +9,8 @@ import (
 )
 
 var (
-	grid   Grid
-	dialog qml.Object
-	file   = flag.String("file", "", "json map to load at startup")
+	grid Grid
+	file = flag.String("file", "", "json map to load at startup")
 )
 
 func init() {
@@ -48,13 +47,7 @@ func run() error {
 	grid.Cols = win.Root().ObjectByName("cols")
 	grid.Grid = win.Root().ObjectByName("grid")
 	grid.StatusText = win.Root().ObjectByName("statusText")
-	grid.DefFoodCnt = win.Root().ObjectByName("defaultFoodCountCombo")
-	grid.FoodCnt = win.Root().ObjectByName("countSpinner")
-	grid.LifeCnt = win.Root().ObjectByName("lifeSpinner")
-	grid.FoodTime = win.Root().ObjectByName("defaultFoodLifetimeCombo")
 	grid.TileComp = &Tile{Object: tileComponent}
-
-	dialog = win.Root().ObjectByName("fileDialog")
 
 	if *file != "" {
 		grid.LoadGrid(*file)
